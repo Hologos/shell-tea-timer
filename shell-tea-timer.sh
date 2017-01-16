@@ -85,5 +85,5 @@ function tea()
     echo "This is your ${tea_infusion_counter}th infusion."
     echo "Infusing for ${tea_countdown} seconds."
     sleep $tea_countdown
-    say "Do píči čaj."
+    say "Do píči čaj." &
 }
