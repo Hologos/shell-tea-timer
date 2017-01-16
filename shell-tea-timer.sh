@@ -17,11 +17,11 @@ function tea()
     tea_usage="$0 [-r] <tea-type>
 -r          reset infusion counter
 <tea-type>  $TEA_TYPE_WHITE - white tea
-        $TEA_TYPE_GREEN - green tea
-        $TEA_TYPE_OOLONG_STRIP - oolong tea (strips)
-        $TEA_TYPE_OOLONG_ROLLED - oolong tea (balls)
-        $TEA_TYPE_PUERH_RAW - raw (sheng, green) puerh tea
-        $TEA_TYPE_PUERH_RIPE - ripe (shu, red) puerh tea
+            $TEA_TYPE_GREEN - green tea
+            $TEA_TYPE_OOLONG_STRIP - oolong tea (strips)
+            $TEA_TYPE_OOLONG_ROLLED - oolong tea (balls)
+            $TEA_TYPE_PUERH_RAW - raw (sheng, green) puerh tea
+            $TEA_TYPE_PUERH_RIPE - ripe (shu, red) puerh tea
 "
 
     if [[ $# -lt 1 ]]; then
