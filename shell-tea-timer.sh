@@ -40,6 +40,8 @@ function tea()
     
     tea_infusion_counter=$(( $tea_infusion_counter + 1 ))
 
+    # infusion times set according Mei Leaf (https://meileaf.com)
+    # available at http://chinalifeweb.com/guides/the-tea-brewing-chart/
     case $tea_type in
         "$TEA_TYPE_WHITE")
             tea_initial_infusion=20
