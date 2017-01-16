@@ -29,8 +29,6 @@ function tea()
         return 1
     fi
 
-    tea_reset=0
-
     if [[ $# -eq 1 ]] && [[ "$1" == "-r" ]]; then
         tea_infusion_counter=0
     elif [[ $# -eq 2 ]]; then
