@@ -81,6 +81,11 @@ function tea()
             tea_next_infusion=5
         ;;
 
+        "test")
+            tea_initial_infusion=0
+            tea_next_infusion=0
+        ;;
+
         *)
             >&2 echo "Unknown tea type.\n"
             >&2 echo "$tea_usage"
