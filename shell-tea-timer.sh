@@ -39,6 +39,14 @@ function tea()
     fi
     
     tea_infusion_counter=$(( $tea_infusion_counter + 1 ))
+    tea_infusion_counter_suffix=""
+
+    case $tea_infusion_counter in
+        1) tea_infusion_counter_suffix="st";;
+        2) tea_infusion_counter_suffix="nd";;
+        3) tea_infusion_counter_suffix="rd";;
+        *) tea_infusion_counter_suffix="th";;
+    esac
 
     # infusion times set according Mei Leaf (https://meileaf.com)
     # available at http://chinalifeweb.com/guides/the-tea-brewing-chart/
@@ -82,7 +90,7 @@ function tea()
 
     tea_countdown=$(( $tea_initial_infusion + ($tea_infusion_counter - 1) * $tea_next_infusion ))
 
-    echo "This is your ${tea_infusion_counter}th infusion."
+    echo "This is your ${tea_infusion_counter}${tea_infusion_counter_suffix} infusion."
     echo "Infusing for ${tea_countdown} seconds."
     sleep $tea_countdown
     say "Do píči čaj." &
