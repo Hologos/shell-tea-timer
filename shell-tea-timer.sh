@@ -7,6 +7,8 @@ export tea_next_infusion=0
 
 TEA_TYPE_WHITE="white"
 TEA_TYPE_GREEN="green"
+TEA_TYPE_RED_SMALL="red-small"
+TEA_TYPE_RED_LARGE="red-large"
 TEA_TYPE_OOLONG_STRIP="oolong-strip"
 TEA_TYPE_OOLONG_ROLLED="oolong-ball"
 TEA_TYPE_PUERH_RAW="puerh-raw"
@@ -18,6 +20,8 @@ function tea()
 -r          reset infusion counter
 <tea-type>  $TEA_TYPE_WHITE - white tea
             $TEA_TYPE_GREEN - green tea
+            $TEA_TYPE_RED_SMALL - red tea (small leaf)
+            $TEA_TYPE_RED_LARGE - red tea (large leaf)
             $TEA_TYPE_OOLONG_STRIP - oolong tea (strips)
             $TEA_TYPE_OOLONG_ROLLED - oolong tea (balls)
             $TEA_TYPE_PUERH_RAW - raw (sheng, green) puerh tea
@@ -59,6 +63,16 @@ function tea()
         "$TEA_TYPE_GREEN")
             tea_initial_infusion=15
             tea_next_infusion=3
+        ;;
+
+        "$TEA_TYPE_RED_SMALL")
+            tea_initial_infusion=10
+            tea_next_infusion=5
+        ;;
+
+        "$TEA_TYPE_RED_LARGE")
+            tea_initial_infusion=15
+            tea_next_infusion=5
         ;;
 
         "$TEA_TYPE_OOLONG_STRIP")
