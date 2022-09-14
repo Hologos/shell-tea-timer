@@ -168,7 +168,6 @@ function stt::inputparser::parse_input() {
         case "${input}" in
 
             "-${_STT_RESET_OPTION}" )
-                shift
                 stt::reset_infusion_counter
             ;;
 
@@ -187,7 +186,6 @@ function stt::inputparser::parse_input() {
             "${STT_TEA_TYPE_PUERH_RAW}" | \
             "${STT_TEA_TYPE_PUERH_RIPE}" | \
             "test" )
-                shift
                 stt::utils::write_param "tea_type" "${input}"
 
                 echo
