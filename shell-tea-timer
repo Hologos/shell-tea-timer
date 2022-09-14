@@ -168,12 +168,15 @@ function stt::utils::terminate() {
 }
 
 function stt::inputparser::parse_input() {
+    local reset=0
+
     while [[ ${#} -ne 0 ]] && [[ "${1}" != "" ]]; do
         local input="${1}"
 
         case "${input}" in
 
             "-${_STT_RESET_OPTION}" )
+                reset=1
                 stt::reset_infusion_counter
             ;;
 
@@ -194,14 +197,16 @@ function stt::inputparser::parse_input() {
             "test" )
                 stt::utils::write_param "tea_type" "${input}"
 
-                echo
-                ansi --bold "Do you want to reset infusion counter? [y/n]: "
-                local answer
-                read -r answer
-                if [[ "${answer}" =~ ^[yY]$ ]]; then
-                    stt::reset_infusion_counter
+                if [[ "${reset}" -eq 0 ]]; then
+                    echo
+                    ansi --bold "Do you want to reset infusion counter? [y/n]: "
+                    local answer
+                    read -r answer
+                    if [[ "${answer}" =~ ^[yY]$ ]]; then
+                        stt::reset_infusion_counter
+                    fi
+                    echo
                 fi
-                echo
             ;;
 
             * )
