@@ -1,0 +1,299 @@
+#! /usr/bin/env bash
+
+set -uo pipefail
+
+readonly _STT_RESET_OPTION="r"
+readonly _STT_HELP_OPTION="h"
+
+readonly STT_TEA_TYPE_WHITE="white"
+readonly STT_TEA_TYPE_GREEN="green"
+readonly STT_TEA_TYPE_RED_SMALL="red-small"
+readonly STT_TEA_TYPE_RED_LARGE="red-large"
+readonly STT_TEA_TYPE_OOLONG_STRIP="oolong-strip"
+readonly STT_TEA_TYPE_OOLONG_ROLLED="oolong-ball"
+readonly STT_TEA_TYPE_PUERH_RAW="puerh-raw"
+readonly STT_TEA_TYPE_PUERH_RIPE="puerh-ripe"
+
+readonly STT_CONFIG_FILEPATH_ROOT="/tmp/shell-tea-timer"
+
+function stt:utils::repeat() {
+    local end="${1}"
+    local str="${2}"
+
+    local start=1
+    local range
+
+    range="$(seq "${start}" "${end}")"
+
+    if [[ "$(echo "if (${end} < ${start}) 0 else 1" | bc)" == "0" ]]; then
+        return
+    fi
+
+    for i in ${range}; do
+        printf '%s' "${str}"
+    done
+}
+
+function stt:utils::wait_with_bar_counter() {
+    local duration="${1}"
+    duration="$(( duration * 2 ))"
+
+    local bar_length=10
+    local pre post tick finished
+
+    tick="$(echo "scale=2;${bar_length}/${duration}" | bc)"
+
+
+    echo
+
+    while true; do
+        post="$(echo "$(echo "scale=2;${duration} * ${tick}" | bc) / 1" | bc)"
+        done="$(echo "scale=2;${bar_length} - (${duration} * ${tick})" | bc)"
+        pre="$(echo "scale=2;${bar_length} - ${post}" | bc)"
+        finished="$(echo "(${done} * 100 / ${bar_length}) / 1" | bc)"
+
+        ansi --no-newline --erase-line=1
+        ansi --no-newline --column=1
+        echo -n
+
+        printf '%s' '<'
+        stt:utils::repeat "${pre}" "="
+        stt:utils::repeat "${post}" " "
+        printf '%s' '>  '
+        printf '%s%% finished' "${finished}"
+
+        if [[ "$(( duration-- ))" -lt 1 ]]; then
+            echo
+            break
+        else
+            sleep 0.5
+        fi
+    done
+
+    echo
+}
+
+function stt::reset_infusion_counter() {
+    stt::utils::write_param "tea_infusion_counter" "0"
+
+    echo
+    ansi --bold "Reseting infusion counter."
+}
+
+function stt::utils::read_param() {
+    local param_name="${1}"
+
+    stt::utils::read_param_grace "${param_name}" || stt::utils::terminate "Parameter [${param_name}] does not exist."
+}
+
+function stt::utils::read_param_grace() {
+    local param_name="${1}"
+
+    local filepath="${STT_CONFIG_FILEPATH_ROOT}.${param_name}.cfg"
+
+    if [[ ! -r "${filepath}" ]]; then
+        return 1
+    fi
+
+    cat "${filepath}"
+}
+
+function stt::utils::write_param() {
+    local param_name="${1}"
+    local param_value="${2}"
+
+    local filepath="${STT_CONFIG_FILEPATH_ROOT}.${param_name}.cfg"
+
+    printf '%s' "${param_value}" > "${filepath}" 2> /dev/null
+}
+
+function stt::utils::usage() {
+    # shellcheck disable=SC2155
+    local fmt_bold="$(ansi --bold --no-restore)"
+    # shellcheck disable=SC2155
+    local fmt_underline="$(ansi --underline --no-restore)"
+    # shellcheck disable=SC2155
+    local fmt_reset="$(ansi --reset-attrib)"
+
+    >&2 echo
+    >&2 echo "Usage: ${0} [-${_STT_HELP_OPTION}] [-${_STT_RESET_OPTION}] [tea-type]"
+    >&2 echo
+    >&2 echo "    ${fmt_bold}-${_STT_HELP_OPTION}${fmt_reset}"
+    >&2 echo "        Prints this help."
+    >&2 echo
+    >&2 echo "    ${fmt_bold}-${_STT_RESET_OPTION}${fmt_reset}"
+    >&2 echo "        Resets infusion counters."
+    >&2 echo
+    >&2 echo "    ${fmt_bold}<tea-type>${fmt_reset}"
+    >&2 echo "        Type of tea you want to brew."
+    >&2 echo
+    >&2 echo "        Possible values:"
+    >&2 echo "            ${STT_TEA_TYPE_WHITE} - white tea"
+    >&2 echo "            ${STT_TEA_TYPE_GREEN} - green tea"
+    >&2 echo "            ${STT_TEA_TYPE_RED_SMALL} - red tea (small leaf)"
+    >&2 echo "            ${STT_TEA_TYPE_RED_LARGE} - red tea (large leaf)"
+    >&2 echo "            ${STT_TEA_TYPE_OOLONG_STRIP} - oolong tea (strips)"
+    >&2 echo "            ${STT_TEA_TYPE_OOLONG_ROLLED} - oolong tea (balls)"
+    >&2 echo "            ${STT_TEA_TYPE_PUERH_RAW} - raw (sheng, green) puerh tea"
+    >&2 echo "            ${STT_TEA_TYPE_PUERH_RIPE} - ripe (shu, red) puerh tea"
+}
+
+function stt::utils::terminate() {
+    local exit_code="1"
+    local message=""
+
+    if [[ ${#} -eq 1 ]]; then
+        message="${1}"
+    elif [[ ${#} -eq 2 ]]; then
+        exit_code="${1}"
+        message="${2}"
+    fi
+
+    if [[ ${#} -ne 0 ]]; then
+        >&2 echo
+        >&2 ansi --bold --red "The program has been terminated due to a critical error:"
+        >&2 echo
+        >&2 echo "${message}"
+    fi
+
+    exit "${exit_code}"
+}
+
+function stt::inputparser::parse_input() {
+    while [[ ${#} -ne 0 ]] && [[ "${1}" != "" ]]; do
+        local input="${1}"
+
+        case "${input}" in
+
+            "-${_STT_RESET_OPTION}" )
+                shift
+                stt::reset_infusion_counter
+            ;;
+
+            "-${_STT_HELP_OPTION}" )
+                stt::utils::usage
+                stt::utils::terminate
+            ;;
+
+            "${STT_TEA_TYPE_WHITE}" | \
+            "${STT_TEA_TYPE_GREEN}" | \
+            "${STT_TEA_TYPE_GREEN}" | \
+            "${STT_TEA_TYPE_RED_SMALL}" | \
+            "${STT_TEA_TYPE_RED_LARGE}" | \
+            "${STT_TEA_TYPE_OOLONG_STRIP}" | \
+            "${STT_TEA_TYPE_OOLONG_ROLLED}" | \
+            "${STT_TEA_TYPE_PUERH_RAW}" | \
+            "${STT_TEA_TYPE_PUERH_RIPE}" | \
+            "test" )
+                shift
+                stt::utils::write_param "tea_type" "${input}"
+
+                echo
+                ansi --bold "Do you want to reset infusion counter? [y/n]: "
+                local answer
+                read -r answer
+                if [[ "${answer}" =~ ^[yY]$ ]]; then
+                    stt::reset_infusion_counter
+                fi
+                echo
+            ;;
+
+            * )
+                stt::utils::usage
+                stt::utils::terminate "Unknown option [${input}]."
+        esac
+
+        shift
+    done
+}
+
+stt::inputparser::parse_input "${@}"
+
+tea_type="$(stt::utils::read_param "tea_type")" || exit ${?}
+
+case "${tea_type}" in
+    # infusion times set according Mei Leaf (https://meileaf.com)
+    # available at http://chinalifeweb.com/guides/the-tea-brewing-chart/
+    "${STT_TEA_TYPE_WHITE}" )
+        shift
+        stt::utils::write_param "tea_initial_infusion" "20"
+        stt::utils::write_param "tea_next_infusion" "10"
+    ;;
+
+    "${STT_TEA_TYPE_GREEN}" )
+        shift
+        stt::utils::write_param "tea_initial_infusion" "15"
+        stt::utils::write_param "tea_next_infusion" "3"
+    ;;
+
+    "${STT_TEA_TYPE_RED_SMALL}" )
+        shift
+        stt::utils::write_param "tea_initial_infusion" "10"
+        stt::utils::write_param "tea_next_infusion" "5"
+    ;;
+
+    "${STT_TEA_TYPE_RED_LARGE}" )
+        shift
+        stt::utils::write_param "tea_initial_infusion" "16"
+        stt::utils::write_param "tea_next_infusion" "5"
+    ;;
+
+    "${STT_TEA_TYPE_OOLONG_STRIP}" )
+        shift
+        stt::utils::write_param "tea_initial_infusion" "20"
+        stt::utils::write_param "tea_next_infusion" "5"
+    ;;
+
+    "${STT_TEA_TYPE_OOLONG_ROLLED}" )
+        shift
+        stt::utils::write_param "tea_initial_infusion" "25"
+        stt::utils::write_param "tea_next_infusion" "5"
+    ;;
+
+    "${STT_TEA_TYPE_PUERH_RAW}" )
+        shift
+        stt::utils::write_param "tea_initial_infusion" "10"
+        stt::utils::write_param "tea_next_infusion" "3"
+    ;;
+
+    "${STT_TEA_TYPE_PUERH_RIPE}" )
+        shift
+        stt::utils::write_param "tea_initial_infusion" "10"
+        stt::utils::write_param "tea_next_infusion" "5"
+    ;;
+
+    "test" )
+        shift
+        stt::utils::write_param "tea_initial_infusion" "2"
+        stt::utils::write_param "tea_next_infusion" "1"
+    ;;
+
+    * )
+        stt::utils::terminate "Unknown tea type [${tea_type}]."
+esac
+
+tea_initial_infusion="$(stt::utils::read_param "tea_initial_infusion")" || exit ${?}
+tea_next_infusion="$(stt::utils::read_param "tea_next_infusion")" || exit ${?}
+
+tea_infusion_counter="$(stt::utils::read_param_grace "tea_infusion_counter" || printf '0')"
+
+tea_infusion_counter="$(( tea_infusion_counter + 1 ))"
+tea_infusion_counter_suffix=""
+
+stt::utils::write_param "tea_infusion_counter" "${tea_infusion_counter}"
+
+case $tea_infusion_counter in
+    1) tea_infusion_counter_suffix="st";;
+    2) tea_infusion_counter_suffix="nd";;
+    3) tea_infusion_counter_suffix="rd";;
+    *) tea_infusion_counter_suffix="th";;
+esac
+
+tea_countdown="$(( tea_initial_infusion + (tea_infusion_counter - 1) * tea_next_infusion ))"
+
+echo "You are brewing $(ansi --bold "${tea_type}") tea."
+echo "This is your $(ansi --bold "${tea_infusion_counter}${tea_infusion_counter_suffix}") infusion."
+echo "Infuse for $(ansi --bold "${tea_countdown}") seconds."
+stt:utils::wait_with_bar_counter "${tea_countdown}"
+echo "Decant your tea now!"
+say "Do píči čaj."
