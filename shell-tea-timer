@@ -36,11 +36,13 @@ function stt:utils::repeat() {
 
 function stt:utils::wait_with_bar_counter() {
     local duration="${1}"
-    duration="$(( duration * 2 ))"
 
     local bar_length=10
-    local pre post tick finished
+    local cycles_per_second=2
+    local pre post tick finished sleep_length
 
+    duration="$(( duration * cycles_per_second ))"
+    sleep_length="$(echo "scale=2;1/${cycles_per_second}" | bc)"
     tick="$(echo "scale=2;${bar_length}/${duration}" | bc)"
 
 
@@ -66,7 +68,7 @@ function stt:utils::wait_with_bar_counter() {
             echo
             break
         else
-            sleep 0.5
+            sleep "${sleep_length}"
         fi
     done
 
