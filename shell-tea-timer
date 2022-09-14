@@ -53,6 +53,12 @@ function stt:utils::wait_with_bar_counter() {
         done="$(echo "scale=2;${bar_length} - (${duration} * ${tick})" | bc)"
         pre="$(echo "scale=2;${bar_length} - ${post}" | bc)"
         finished="$(echo "(${done} * 100 / ${bar_length}) / 1" | bc)"
+        seconds_left="$(( duration / cycles_per_second ))"
+        seconds_suffix="s"
+
+        if [[ "${seconds_left}" =~ ^1$ ]]; then
+            seconds_suffix=""
+        fi
 
         ansi --no-newline --erase-line=1
         ansi --no-newline --column=1
@@ -62,7 +68,7 @@ function stt:utils::wait_with_bar_counter() {
         stt:utils::repeat "${pre}" "="
         stt:utils::repeat "${post}" " "
         printf '%s' '>  '
-        printf '%s%% finished' "${finished}"
+        printf '%s%% finished (%s second%s)' "${finished}" "${seconds_left}" "${seconds_suffix}"
 
         if [[ "$(( duration-- ))" -lt 1 ]]; then
             echo
