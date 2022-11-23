@@ -4,23 +4,55 @@ set -uo pipefail
 
 readonly _STT_RESET_OPTION="r"
 readonly _STT_HELP_OPTION="h"
-
-readonly STT_TEA_TYPE_WHITE="white"
-readonly STT_TEA_TYPE_GREEN="green"
-readonly STT_TEA_TYPE_RED_SMALL="red-small"
-readonly STT_TEA_TYPE_RED_LARGE="red-large"
-readonly STT_TEA_TYPE_OOLONG_STRIP="oolong-strip"
-readonly STT_TEA_TYPE_OOLONG_ROLLED="oolong-ball"
-readonly STT_TEA_TYPE_PUERH_RAW="puerh-raw"
-readonly STT_TEA_TYPE_PUERH_RIPE="puerh-ripe"
-readonly STT_TEA_DAY_DRINKING_DIVA="day-drinking-diva"
-readonly STT_TEA_YOUNG_GUSHU_2022="young-gushu-2022"
+readonly _STT_SETUP_ARGUMENT="setup"
 
 readonly STT_CONFIG_FILEPATH_ROOT="/tmp/shell-tea-timer"
+readonly UNDEF_VALUE="undef"
 
-TEA_TYPE="undef"
-TEA_INITIAL_INFUSION="undef"
-TEA_NEXT_INFUSION="undef"
+readonly SCRIPT_DIRPATH="${HOME}/Scripts/shell-tea-timer"
+readonly CONF_DIRPATH="${SCRIPT_DIRPATH}/conf"
+readonly TEAS_CONF_DIRPATH="${CONF_DIRPATH}/teas"
+readonly POTS_CONF_DIRPATH="${CONF_DIRPATH}/pots"
+
+TEA="${UNDEF_VALUE}"
+POT="${UNDEF_VALUE}"
+TEA_INITIAL_INFUSION_DURATION="${UNDEF_VALUE}"
+TEA_NEXT_INFUSION_DURATION="${UNDEF_VALUE}"
+TEA_NUMBER_OF_INFUSIONS="${UNDEF_VALUE}"
+POT_DECANT_DURATION="${UNDEF_VALUE}"
+TEA_BREWING_TEMP="${UNDEF_VALUE}"
+TEA_AMOUNT_PER_100G="${UNDEF_VALUE}"
+POT_CAPACITY_WITH_LEAVES="${UNDEF_VALUE}"
+
+function stt::utils::terminate() {
+    local exit_code="1"
+    local message=""
+
+    if [[ ${#} -eq 1 ]]; then
+        message="${1}"
+    elif [[ ${#} -eq 2 ]]; then
+        exit_code="${1}"
+        message="${2}"
+    fi
+
+    if [[ ${#} -ne 0 ]]; then
+        >&2 echo
+        >&2 ansi --bold --red "The program has been terminated due to a critical error:"
+        >&2 echo
+        >&2 echo "${message}"
+    fi
+
+    exit "${exit_code}"
+}
+
+function stt::utils::check_if_set() {
+    local param_name="${1}"
+    local input="${2}"
+
+    if [[ "${input}" == "${UNDEF_VALUE}" ]]; then
+        stt::utils::terminate "Undefined value for param [${param_name}]."
+    fi
+}
 
 function stt:utils::repeat_char() {
     local end="${1}"
@@ -45,12 +77,13 @@ function stt:utils::wait_with_bar_counter() {
 
     local bar_length=10
     local cycles_per_second=2
-    local pre post tick finished sleep_length
+    local decant_start_reported=0
+    local pre post tick finished sleep_length decant_start
 
     duration="$(( duration * cycles_per_second ))"
     sleep_length="$(echo "scale=2;1/${cycles_per_second}" | bc)"
     tick="$(echo "scale=2;${bar_length}/${duration}" | bc)"
-
+    decant_start="$(stt::calculate_start_of_decanting_raw "${duration}")"
 
     echo
 
@@ -64,6 +97,11 @@ function stt:utils::wait_with_bar_counter() {
 
         if [[ "${seconds_left}" =~ ^1$ ]]; then
             seconds_suffix=""
+        fi
+
+        if [[ "${seconds_left}" -eq "${decant_start}" ]] && [[ "${decant_start_reported}" -eq 0 ]]; then
+            decant_start_reported=1
+            say "Začni slévat!" &
         fi
 
         ansi --no-newline --erase-line=1
@@ -87,28 +125,19 @@ function stt:utils::wait_with_bar_counter() {
     echo
 }
 
-function stt::reset_infusion_counter() {
-    local tea_type="${1}"
-
-    stt::utils::write_param "${tea_type}" "tea_infusion_counter" "0"
-
-    echo
-    echo "Reseting $(ansi --bold "${tea_type}") infusion counter."
-}
-
 function stt::utils::read_param() {
-    local tea_type="${1}"
+    local tea="${1}"
     local param_name="${2}"
 
-    stt::utils::read_param_grace "${tea_type}" "${param_name}" \
-        || stt::utils::terminate "Parameter [${param_name}] does not exist for tea type [${tea_type}]."
+    stt::utils::read_param_grace "${tea}" "${param_name}" \
+        || stt::utils::terminate "Parameter [${param_name}] does not exist for tea [${tea}]."
 }
 
 function stt::utils::read_param_grace() {
-    local tea_type="${1}"
+    local tea="${1}"
     local param_name="${2}"
 
-    local filepath="${STT_CONFIG_FILEPATH_ROOT}.${tea_type}.${param_name}.cfg"
+    local filepath="${STT_CONFIG_FILEPATH_ROOT}.${tea}.${param_name}.cfg"
 
     if [[ ! -r "${filepath}" ]]; then
         return 1
@@ -118,14 +147,42 @@ function stt::utils::read_param_grace() {
 }
 
 function stt::utils::write_param() {
-    local tea_type="${1}"
+    local tea="${1}"
     local param_name="${2}"
     local param_value="${3}"
 
-    local filepath="${STT_CONFIG_FILEPATH_ROOT}.${tea_type}.${param_name}.cfg"
+    local filepath="${STT_CONFIG_FILEPATH_ROOT}.${tea}.${param_name}.cfg"
 
     printf '%s' "${param_value}" > "${filepath}" 2> /dev/null
 }
+
+function stt::utils::discover_files() {
+    local dirpath="${1}"
+    local file_ext="${2}"
+
+    if [[ ! -e "${dirpath}" ]]; then
+        stt::utils::terminate "Directory [${dirpath}] does not exist."
+    fi
+
+    if [[ ! -d "${dirpath}" ]]; then
+        stt::utils::terminate "[${dirpath}] is not a directory."
+    fi
+
+    find "${dirpath}" -type f -name "*.${file_ext}" -exec basename {} \;
+}
+
+function stt::utils::discover_tea_conf_files() {
+    stt::utils::discover_files "${TEAS_CONF_DIRPATH}" "conf"
+}
+
+function stt::utils::discover_teas() {
+    stt::utils::discover_tea_conf_files | rev | cut -c 6- | rev | sort
+}
+
+function stt::utils::discover_pot_conf_files() {
+    stt::utils::discover_files "${POTS_CONF_DIRPATH}" "conf"
+}
+
 
 function stt::utils::usage() {
     # shellcheck disable=SC2155
@@ -134,9 +191,10 @@ function stt::utils::usage() {
     local fmt_underline="$(ansi --underline --no-restore)"
     # shellcheck disable=SC2155
     local fmt_reset="$(ansi --reset-attrib)"
+    local tea
 
     >&2 echo
-    >&2 echo "Usage: ${0} [-${_STT_HELP_OPTION}] [-${_STT_RESET_OPTION}] <tea-type>"
+    >&2 echo "Usage: ${0} [-${_STT_HELP_OPTION}] [-${_STT_RESET_OPTION}] [<${_STT_SETUP_ARGUMENT}> | <tea>]"
     >&2 echo
     >&2 echo "    ${fmt_bold}-${_STT_HELP_OPTION}${fmt_reset}"
     >&2 echo "        Prints this help."
@@ -144,111 +202,127 @@ function stt::utils::usage() {
     >&2 echo "    ${fmt_bold}-${_STT_RESET_OPTION}${fmt_reset}"
     >&2 echo "        Resets infusion counters."
     >&2 echo
-    >&2 echo "    ${fmt_bold}<tea-type>${fmt_reset}"
-    >&2 echo "        Type of tea you want to brew."
+    >&2 echo "    ${fmt_bold}<${_STT_SETUP_ARGUMENT}>${fmt_reset}"
+    >&2 echo "        Perform setup of tea and pot."
+    >&2 echo
+    >&2 echo "    ${fmt_bold}<tea>${fmt_reset}"
+    >&2 echo "        Tea you want to brew."
     >&2 echo
     >&2 echo "        Possible values:"
-    >&2 echo "            ${STT_TEA_TYPE_WHITE} - white tea"
-    >&2 echo "            ${STT_TEA_TYPE_GREEN} - green tea"
-    >&2 echo "            ${STT_TEA_TYPE_RED_SMALL} - red tea (small leaf)"
-    >&2 echo "            ${STT_TEA_TYPE_RED_LARGE} - red tea (large leaf)"
-    >&2 echo "            ${STT_TEA_TYPE_OOLONG_STRIP} - oolong tea (strips)"
-    >&2 echo "            ${STT_TEA_TYPE_OOLONG_ROLLED} - oolong tea (balls)"
-    >&2 echo "            ${STT_TEA_TYPE_PUERH_RAW} - raw (sheng, green) puerh tea"
-    >&2 echo "            ${STT_TEA_TYPE_PUERH_RIPE} - ripe (shu, red) puerh tea"
-    >&2 echo
-    >&2 echo "            Actual teas:"
-    >&2 echo "                ${STT_TEA_DAY_DRINKING_DIVA} - Day Drinking Diva (raw, sheng)"
-    >&2 echo "                ${STT_TEA_YOUNG_GUSHU_2022} - Young Gushu 2022 (raw, sheng)"
+    stt::utils::discover_teas | \
+        while IFS=$'\n' read -r tea; do
+            >&2 echo "            ${tea}"
+        done
 }
 
-function stt::utils::terminate() {
-    local exit_code="1"
-    local message=""
+function stt::reset_infusion_counter() {
+    local tea="${1}"
 
-    if [[ ${#} -eq 1 ]]; then
-        message="${1}"
-    elif [[ ${#} -eq 2 ]]; then
-        exit_code="${1}"
-        message="${2}"
-    fi
+    stt::utils::write_param "${tea}" "tea_infusion_counter" "0"
 
-    if [[ ${#} -ne 0 ]]; then
-        >&2 echo
-        >&2 ansi --bold --red "The program has been terminated due to a critical error:"
-        >&2 echo
-        >&2 echo "${message}"
-    fi
-
-    exit "${exit_code}"
+    echo
+    echo "Reseting $(ansi --bold "${tea}") infusion counter."
 }
 
-function stt::set_variables_if_valid_tea_type() {
-    local tea_type="${1}"
+function stt::water_temp() {
+    echo "${TEA_BREWING_TEMP}$(printf '%s' $'\xc2\xb0')C"
+}
 
-    case "${tea_type}" in
-        # infusion times set according Mei Leaf (https://meileaf.com)
-        # available at http://chinalifeweb.com/guides/the-tea-brewing-chart/
-        "${STT_TEA_TYPE_WHITE}" )
-            TEA_INITIAL_INFUSION=20
-            TEA_NEXT_INFUSION=10
-        ;;
+function stt::infusion_number() {
+    printf '%s' "${TEA_INFUSION_COUNTER}"
 
-        "${STT_TEA_TYPE_GREEN}" )
-            TEA_INITIAL_INFUSION=15
-            TEA_NEXT_INFUSION=3
-        ;;
-
-        "${STT_TEA_TYPE_RED_SMALL}" )
-            TEA_INITIAL_INFUSION=10
-            TEA_NEXT_INFUSION=5
-        ;;
-
-        "${STT_TEA_TYPE_RED_LARGE}" )
-            TEA_INITIAL_INFUSION=16
-            TEA_NEXT_INFUSION=5
-        ;;
-
-        "${STT_TEA_TYPE_OOLONG_STRIP}" )
-            TEA_INITIAL_INFUSION=20
-            TEA_NEXT_INFUSION=5
-        ;;
-
-        "${STT_TEA_TYPE_OOLONG_ROLLED}" )
-            TEA_INITIAL_INFUSION=25
-            TEA_NEXT_INFUSION=5
-        ;;
-
-        "${STT_TEA_TYPE_PUERH_RAW}" )
-            TEA_INITIAL_INFUSION=10
-            TEA_NEXT_INFUSION=3
-        ;;
-
-        "${STT_TEA_TYPE_PUERH_RIPE}" )
-            TEA_INITIAL_INFUSION=10
-            TEA_NEXT_INFUSION=5
-        ;;
-
-        "${STT_TEA_DAY_DRINKING_DIVA}" )
-            TEA_INITIAL_INFUSION=20
-            TEA_NEXT_INFUSION=5
-        ;;
-
-        "${STT_TEA_YOUNG_GUSHU_2022}" )
-            TEA_INITIAL_INFUSION=25
-            TEA_NEXT_INFUSION=5
-        ;;
-
-        "test" )
-            TEA_INITIAL_INFUSION=2
-            TEA_NEXT_INFUSION=1
-        ;;
-
-        * )
-            return 1
+    case $TEA_INFUSION_COUNTER in
+        1) echo "st";;
+        2) echo "nd";;
+        3) echo "rd";;
+        *) echo "th";;
     esac
+}
+
+function stt::calculate_amount() {
+    echo "$(echo "scale=1;${POT_CAPACITY_WITH_LEAVES}/100*${TEA_AMOUNT_PER_100G}" | bc) g"
+}
+
+function stt::calculate_start_of_decanting_raw() {
+    local tea_countdown="${1}"
+    local ratio=0.6
+
+    echo "scale=0;(${POT_DECANT_DURATION}*${ratio})/1" | bc
+}
+
+function stt::calculate_start_of_decanting() {
+    local tea_countdown="${1}"
+    local start_of_decanting
+
+    start_of_decanting="$(stt::calculate_start_of_decanting_raw "${tea_countdown}")"
+
+    printf '%s second' "${start_of_decanting}"
+
+    if [[ "${start_of_decanting}" -ne 1 ]]; then
+        echo "s"
+    else
+        echo
+    fi
+}
+
+function stt::setup_params_if_valid_tea() {
+    local tea="${1}"
+    local tea_config_filepath
+    local pot_config_filepath
+
+    TEA="${tea}"
+    tea_config_filepath="$(stt::utils::discover_tea_conf_files | grep "${tea}")" || return 1
+
+    source "${TEAS_CONF_DIRPATH}/${tea_config_filepath}"
+
+    stt::utils::check_if_set "tea name" "${TEA_NAME}"
+    stt::utils::check_if_set "initial infusion duration" "${TEA_INITIAL_INFUSION_DURATION}"
+    stt::utils::check_if_set "next infusion duration" "${TEA_NEXT_INFUSION_DURATION}"
+    stt::utils::check_if_set "number of infusions" "${TEA_NUMBER_OF_INFUSIONS}"
+    stt::utils::check_if_set "brewing temperature" "${TEA_BREWING_TEMP}"
+    stt::utils::check_if_set "amount per 100g" "${TEA_AMOUNT_PER_100G}"
+
+    POT="$(stt::utils::read_param "${TEA}" "pot")" || exit ${?}
+    pot_config_filepath="$(stt::utils::discover_pot_conf_files | grep "${POT}")" || return 1
+
+    source "${POTS_CONF_DIRPATH}/${pot_config_filepath}"
+
+    stt::utils::check_if_set "pot decant duration" "${POT_DECANT_DURATION}"
+    stt::utils::check_if_set "pot capacity with leaves" "${POT_CAPACITY_WITH_LEAVES}"
 
     return 0
+}
+
+function stt::setup() {
+    # TODO: check if FZF is installed
+    echo
+    ansi --bold --no-newline "Choose a tea you want to brew: "
+    TEA="$(stt::utils::discover_tea_conf_files | rev | cut -c 6- | rev | sort | fzf)"
+    ansi --bold --no-newline "Choose a tea you want to brew: "
+    ansi "${TEA}"
+
+    echo
+    ansi --bold --no-newline "Choose a pot you want to brew in: "
+    POT="$(stt::utils::discover_pot_conf_files | rev | cut -c 6- | rev | sort | fzf)"
+    ansi --bold --no-newline "Choose a pot you want to brew in: "
+    ansi "${POT}"
+    stt::utils::write_param "${TEA}" "pot" "${POT}"
+
+    stt::reset_infusion_counter "${TEA}"
+
+    stt::setup_params_if_valid_tea "${TEA}"
+
+    echo
+    echo "Heat your water to $(ansi --bold "$(stt::water_temp)")."
+
+    echo
+    echo "Use $(ansi --bold "$(stt::calculate_amount)") of leaves (${TEA_AMOUNT_PER_100G} g per 100 ml, pot capacity is ${POT_CAPACITY_WITH_LEAVES} ml)."
+
+    local command="${0} ${TEA}"
+
+    echo
+    ansi --bold "Your command has been copied to your clipboard!"
+    printf "%s" "${command}" | pbcopy
 }
 
 function stt::inputparser::parse_input() {
@@ -269,10 +343,14 @@ function stt::inputparser::parse_input() {
                 stt::utils::terminate
             ;;
 
+            "${_STT_SETUP_ARGUMENT}" )
+                stt::setup
+                exit 0
+            ;;
+
             * )
-                if stt::set_variables_if_valid_tea_type "${input}"; then
+                if stt::setup_params_if_valid_tea "${input}"; then
                     selected_tea=1
-                    TEA_TYPE="${input}"
                 else
                     stt::utils::usage
                     stt::utils::terminate "Unknown option [${input}]."
@@ -284,11 +362,11 @@ function stt::inputparser::parse_input() {
 
     if [[ ${selected_tea} -ne 1 ]]; then
         stt::utils::usage
-        stt::utils::terminate "You have to select a tea type."
+        stt::utils::terminate "You have to select a tea."
     fi
 
     if [[ "${reset}" -eq 1 ]]; then
-        stt::reset_infusion_counter "${TEA_TYPE}"
+        stt::reset_infusion_counter "${TEA}"
         echo
         exit 0
     fi
@@ -296,23 +374,23 @@ function stt::inputparser::parse_input() {
 
 stt::inputparser::parse_input "${@}"
 
-tea_infusion_counter="$(stt::utils::read_param_grace "${TEA_TYPE}" "tea_infusion_counter" || printf '0')"
-tea_infusion_counter="$(( tea_infusion_counter + 1 ))"
-stt::utils::write_param "${TEA_TYPE}" "tea_infusion_counter" "${tea_infusion_counter}"
-tea_infusion_counter_suffix=""
+stt::utils::check_if_set "tea type" "${TEA}"
+TEA_INFUSION_COUNTER="$(stt::utils::read_param_grace "${TEA}" "tea_infusion_counter" || printf '0')"
+TEA_INFUSION_COUNTER="$(( TEA_INFUSION_COUNTER + 1 ))"
+stt::utils::write_param "${TEA}" "tea_infusion_counter" "${TEA_INFUSION_COUNTER}"
 
-case $tea_infusion_counter in
-    1) tea_infusion_counter_suffix="st";;
-    2) tea_infusion_counter_suffix="nd";;
-    3) tea_infusion_counter_suffix="rd";;
-    *) tea_infusion_counter_suffix="th";;
-esac
+if [[ "${TEA_INFUSION_COUNTER}" -eq "${TEA_NUMBER_OF_INFUSIONS}" ]]; then
+    say "Poslední nálev!" &
+elif [[ "${TEA_INFUSION_COUNTER}" -gt "${TEA_NUMBER_OF_INFUSIONS}" ]]; then
+    say "Už jsi přes čáru." &
+fi
 
-tea_countdown="$(( TEA_INITIAL_INFUSION + (tea_infusion_counter - 1) * TEA_NEXT_INFUSION ))"
+tea_countdown="$(( TEA_INITIAL_INFUSION_DURATION + (TEA_INFUSION_COUNTER - 1) * TEA_NEXT_INFUSION_DURATION ))"
 
-echo "You are brewing $(ansi --bold "${TEA_TYPE}") tea."
-echo "This is your $(ansi --bold "${tea_infusion_counter}${tea_infusion_counter_suffix}") infusion."
-echo "Infuse for $(ansi --bold "${tea_countdown}") seconds."
+echo "You are brewing $(ansi --bold "${TEA_NAME}") in $(ansi --bold "${POT}") pot."
+echo "This is your $(ansi --bold "$(stt::infusion_number)") infusion out of $(ansi --bold "${TEA_NUMBER_OF_INFUSIONS}")."
+echo "Infuse for $(ansi --bold "${tea_countdown} seconds") in $(ansi --bold "$(stt::water_temp)") water."
+echo "Decanting should start $(ansi --bold "$(stt::calculate_start_of_decanting "${tea_countdown}")") earlier."
 stt:utils::wait_with_bar_counter "${tea_countdown}"
 echo "Decant your tea now!"
 say "Do píči čaj."
