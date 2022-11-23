@@ -22,7 +22,7 @@ TEA_TYPE="undef"
 TEA_INITIAL_INFUSION="undef"
 TEA_NEXT_INFUSION="undef"
 
-function stt:utils::repeat() {
+function stt:utils::repeat_char() {
     local end="${1}"
     local str="${2}"
 
@@ -71,8 +71,8 @@ function stt:utils::wait_with_bar_counter() {
         echo -n
 
         printf '%s' '<'
-        stt:utils::repeat "${pre}" "="
-        stt:utils::repeat "${post}" " "
+        stt:utils::repeat_char "${pre}" "="
+        stt:utils::repeat_char "${post}" " "
         printf '%s' '>  '
         printf '%s%% finished (%s second%s)' "${finished}" "${seconds_left}" "${seconds_suffix}"
 
