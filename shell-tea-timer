@@ -14,6 +14,12 @@ readonly CONF_DIRPATH="${SCRIPT_DIRPATH}/conf"
 readonly TEAS_CONF_DIRPATH="${CONF_DIRPATH}/teas"
 readonly POTS_CONF_DIRPATH="${CONF_DIRPATH}/pots"
 
+readonly SLOWNESS_COMPENSATION_FACTOR=1.2
+
+_DEBUG_COMPENSATION_FACTOR_CHECK_START=0
+_DEBUG_COMPENSATION_FACTOR_CHECK_FINISH=0
+_DEBUG_COMPENSATION_FACTOR_CHECK_DESIRED_DURATION=0
+
 TEA="${UNDEF_VALUE}"
 POT="${UNDEF_VALUE}"
 TEA_INITIAL_INFUSION_DURATION="${UNDEF_VALUE}"
@@ -23,6 +29,26 @@ POT_DECANT_DURATION="${UNDEF_VALUE}"
 TEA_BREWING_TEMP="${UNDEF_VALUE}"
 TEA_AMOUNT_PER_100G="${UNDEF_VALUE}"
 POT_CAPACITY_WITH_LEAVES="${UNDEF_VALUE}"
+
+function stt::debug::report_compensasion_factor() {
+    local real_world_duration duration_diff slowness_compensation_factor
+
+    echo
+    echo "=================="
+    echo "=     DEBUG      ="
+    echo "=================="
+    echo
+
+    real_world_duration="$(( _DEBUG_COMPENSATION_FACTOR_CHECK_FINISH - _DEBUG_COMPENSATION_FACTOR_CHECK_START ))"
+    duration_diff="$(( real_world_duration - _DEBUG_COMPENSATION_FACTOR_CHECK_DESIRED_DURATION ))"
+    slowness_compensation_factor="$(echo "scale=2;(${real_world_duration}*${SLOWNESS_COMPENSATION_FACTOR})/${_DEBUG_COMPENSATION_FACTOR_CHECK_DESIRED_DURATION}" | bc)"
+
+    echo "Desired duration is [${_DEBUG_COMPENSATION_FACTOR_CHECK_DESIRED_DURATION} sec]."
+    echo "Real world duration is [${real_world_duration} sec]."
+    echo
+    echo "Duration difference is [${duration_diff} sec]."
+    echo "Slowness compensation factor should be [${slowness_compensation_factor}] (set value is [${SLOWNESS_COMPENSATION_FACTOR}])."
+}
 
 function stt::utils::terminate() {
     local exit_code="1"
@@ -80,8 +106,11 @@ function stt:utils::wait_with_bar_counter() {
     local decant_start_reported=0
     local pre post tick finished sleep_length decant_start
 
+    _DEBUG_COMPENSATION_FACTOR_CHECK_DESIRED_DURATION="${duration}"
+    _DEBUG_COMPENSATION_FACTOR_CHECK_START="${SECONDS}"
+
     duration="$(( duration * cycles_per_second ))"
-    sleep_length="$(echo "scale=2;1/${cycles_per_second}" | bc)"
+    sleep_length="$(echo "scale=2;(1/${cycles_per_second})/${SLOWNESS_COMPENSATION_FACTOR}" | bc)"
     tick="$(echo "scale=2;${bar_length}/${duration}" | bc)"
     decant_start="$(stt::calculate_start_of_decanting_raw "${duration}")"
 
@@ -121,6 +150,8 @@ function stt:utils::wait_with_bar_counter() {
             sleep "${sleep_length}"
         fi
     done
+
+    _DEBUG_COMPENSATION_FACTOR_CHECK_FINISH="${SECONDS}"
 
     echo
 }
@@ -398,6 +429,7 @@ fi
 
 tea_countdown="$(( TEA_INITIAL_INFUSION_DURATION + (TEA_INFUSION_COUNTER - 1) * TEA_NEXT_INFUSION_DURATION ))"
 
+echo
 echo "You are brewing $(ansi --bold "${TEA_NAME}") in $(ansi --bold "${POT}") pot."
 echo "This is your $(ansi --bold "$(stt::infusion_number)") infusion out of $(ansi --bold "${TEA_NUMBER_OF_INFUSIONS}")."
 echo "Infuse for $(ansi --bold "${tea_countdown} seconds") in $(ansi --bold "$(stt::water_temp)") water."
@@ -405,3 +437,4 @@ echo "Decanting should start $(ansi --bold "$(stt::calculate_start_of_decanting 
 stt:utils::wait_with_bar_counter "${tea_countdown}"
 echo "Decant your tea now!"
 say "Do píči čaj."
+stt::debug::report_compensasion_factor
