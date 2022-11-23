@@ -221,7 +221,7 @@ function stt::reset_infusion_counter() {
     stt::utils::write_param "${tea}" "tea_infusion_counter" "0"
 
     echo
-    echo "Reseting $(ansi --bold "${tea}") infusion counter."
+    echo "Reseting $(ansi --bold "${TEA_NAME}") infusion counter."
 }
 
 function stt::water_temp() {
@@ -265,10 +265,9 @@ function stt::calculate_start_of_decanting() {
     fi
 }
 
-function stt::setup_params_if_valid_tea() {
+function stt::setup_tea_params() {
     local tea="${1}"
     local tea_config_filepath
-    local pot_config_filepath
 
     TEA="${tea}"
     tea_config_filepath="$(stt::utils::discover_tea_conf_files | grep "${tea}")" || return 1
@@ -281,14 +280,26 @@ function stt::setup_params_if_valid_tea() {
     stt::utils::check_if_set "number of infusions" "${TEA_NUMBER_OF_INFUSIONS}"
     stt::utils::check_if_set "brewing temperature" "${TEA_BREWING_TEMP}"
     stt::utils::check_if_set "amount per 100g" "${TEA_AMOUNT_PER_100G}"
+}
 
-    POT="$(stt::utils::read_param "${TEA}" "pot")" || exit ${?}
+function stt::setup_pot_params() {
+    local tea="${1}"
+    local pot_config_filepath
+
+    POT="$(stt::utils::read_param "${tea}" "pot")" || exit ${?}
     pot_config_filepath="$(stt::utils::discover_pot_conf_files | grep "${POT}")" || return 1
 
     source "${POTS_CONF_DIRPATH}/${pot_config_filepath}"
 
     stt::utils::check_if_set "pot decant duration" "${POT_DECANT_DURATION}"
     stt::utils::check_if_set "pot capacity with leaves" "${POT_CAPACITY_WITH_LEAVES}"
+}
+
+function stt::setup_params_if_valid_tea() {
+    local tea="${1}"
+
+    stt::setup_tea_params "${tea}"
+    stt::setup_pot_params "${tea}"
 
     return 0
 }
@@ -298,19 +309,19 @@ function stt::setup() {
     echo
     ansi --bold --no-newline "Choose a tea you want to brew: "
     TEA="$(stt::utils::discover_tea_conf_files | rev | cut -c 6- | rev | sort | fzf)"
+    stt::setup_tea_params "${TEA}"
     ansi --bold --no-newline "Choose a tea you want to brew: "
-    ansi "${TEA}"
+    ansi "${TEA_NAME}"
 
     echo
     ansi --bold --no-newline "Choose a pot you want to brew in: "
     POT="$(stt::utils::discover_pot_conf_files | rev | cut -c 6- | rev | sort | fzf)"
-    ansi --bold --no-newline "Choose a pot you want to brew in: "
-    ansi "${POT}"
     stt::utils::write_param "${TEA}" "pot" "${POT}"
+    stt::setup_pot_params "${TEA}"
+    ansi --bold --no-newline "Choose a pot you want to brew in: "
+    ansi "${POT_NAME}"
 
     stt::reset_infusion_counter "${TEA}"
-
-    stt::setup_params_if_valid_tea "${TEA}"
 
     echo
     echo "Heat your water to $(ansi --bold "$(stt::water_temp)")."
