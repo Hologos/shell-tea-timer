@@ -18,6 +18,10 @@ readonly STT_TEA_YOUNG_GUSHU_2022="young-gushu-2022"
 
 readonly STT_CONFIG_FILEPATH_ROOT="/tmp/shell-tea-timer"
 
+TEA_TYPE="undef"
+TEA_INITIAL_INFUSION="undef"
+TEA_NEXT_INFUSION="undef"
+
 function stt:utils::repeat() {
     local end="${1}"
     local str="${2}"
@@ -84,22 +88,27 @@ function stt:utils::wait_with_bar_counter() {
 }
 
 function stt::reset_infusion_counter() {
-    stt::utils::write_param "tea_infusion_counter" "0"
+    local tea_type="${1}"
+
+    stt::utils::write_param "${tea_type}" "tea_infusion_counter" "0"
 
     echo
-    ansi --bold "Reseting infusion counter."
+    echo "Reseting $(ansi --bold "${tea_type}") infusion counter."
 }
 
 function stt::utils::read_param() {
-    local param_name="${1}"
+    local tea_type="${1}"
+    local param_name="${2}"
 
-    stt::utils::read_param_grace "${param_name}" || stt::utils::terminate "Parameter [${param_name}] does not exist."
+    stt::utils::read_param_grace "${tea_type}" "${param_name}" \
+        || stt::utils::terminate "Parameter [${param_name}] does not exist for tea type [${tea_type}]."
 }
 
 function stt::utils::read_param_grace() {
-    local param_name="${1}"
+    local tea_type="${1}"
+    local param_name="${2}"
 
-    local filepath="${STT_CONFIG_FILEPATH_ROOT}.${param_name}.cfg"
+    local filepath="${STT_CONFIG_FILEPATH_ROOT}.${tea_type}.${param_name}.cfg"
 
     if [[ ! -r "${filepath}" ]]; then
         return 1
@@ -109,10 +118,11 @@ function stt::utils::read_param_grace() {
 }
 
 function stt::utils::write_param() {
-    local param_name="${1}"
-    local param_value="${2}"
+    local tea_type="${1}"
+    local param_name="${2}"
+    local param_value="${3}"
 
-    local filepath="${STT_CONFIG_FILEPATH_ROOT}.${param_name}.cfg"
+    local filepath="${STT_CONFIG_FILEPATH_ROOT}.${tea_type}.${param_name}.cfg"
 
     printf '%s' "${param_value}" > "${filepath}" 2> /dev/null
 }
@@ -126,7 +136,7 @@ function stt::utils::usage() {
     local fmt_reset="$(ansi --reset-attrib)"
 
     >&2 echo
-    >&2 echo "Usage: ${0} [-${_STT_HELP_OPTION}] [-${_STT_RESET_OPTION}] [tea-type]"
+    >&2 echo "Usage: ${0} [-${_STT_HELP_OPTION}] [-${_STT_RESET_OPTION}] <tea-type>"
     >&2 echo
     >&2 echo "    ${fmt_bold}-${_STT_HELP_OPTION}${fmt_reset}"
     >&2 echo "        Prints this help."
@@ -173,8 +183,77 @@ function stt::utils::terminate() {
     exit "${exit_code}"
 }
 
+function stt::set_variables_if_valid_tea_type() {
+    local tea_type="${1}"
+
+    case "${tea_type}" in
+        # infusion times set according Mei Leaf (https://meileaf.com)
+        # available at http://chinalifeweb.com/guides/the-tea-brewing-chart/
+        "${STT_TEA_TYPE_WHITE}" )
+            TEA_INITIAL_INFUSION=20
+            TEA_NEXT_INFUSION=10
+        ;;
+
+        "${STT_TEA_TYPE_GREEN}" )
+            TEA_INITIAL_INFUSION=15
+            TEA_NEXT_INFUSION=3
+        ;;
+
+        "${STT_TEA_TYPE_RED_SMALL}" )
+            TEA_INITIAL_INFUSION=10
+            TEA_NEXT_INFUSION=5
+        ;;
+
+        "${STT_TEA_TYPE_RED_LARGE}" )
+            TEA_INITIAL_INFUSION=16
+            TEA_NEXT_INFUSION=5
+        ;;
+
+        "${STT_TEA_TYPE_OOLONG_STRIP}" )
+            TEA_INITIAL_INFUSION=20
+            TEA_NEXT_INFUSION=5
+        ;;
+
+        "${STT_TEA_TYPE_OOLONG_ROLLED}" )
+            TEA_INITIAL_INFUSION=25
+            TEA_NEXT_INFUSION=5
+        ;;
+
+        "${STT_TEA_TYPE_PUERH_RAW}" )
+            TEA_INITIAL_INFUSION=10
+            TEA_NEXT_INFUSION=3
+        ;;
+
+        "${STT_TEA_TYPE_PUERH_RIPE}" )
+            TEA_INITIAL_INFUSION=10
+            TEA_NEXT_INFUSION=5
+        ;;
+
+        "${STT_TEA_DAY_DRINKING_DIVA}" )
+            TEA_INITIAL_INFUSION=20
+            TEA_NEXT_INFUSION=5
+        ;;
+
+        "${STT_TEA_YOUNG_GUSHU_2022}" )
+            TEA_INITIAL_INFUSION=25
+            TEA_NEXT_INFUSION=5
+        ;;
+
+        "test" )
+            TEA_INITIAL_INFUSION=2
+            TEA_NEXT_INFUSION=1
+        ;;
+
+        * )
+            return 1
+    esac
+
+    return 0
+}
+
 function stt::inputparser::parse_input() {
     local reset=0
+    local selected_tea=0
 
     while [[ ${#} -ne 0 ]] && [[ "${1}" != "" ]]; do
         local input="${1}"
@@ -183,7 +262,6 @@ function stt::inputparser::parse_input() {
 
             "-${_STT_RESET_OPTION}" )
                 reset=1
-                stt::reset_infusion_counter
             ;;
 
             "-${_STT_HELP_OPTION}" )
@@ -191,127 +269,37 @@ function stt::inputparser::parse_input() {
                 stt::utils::terminate
             ;;
 
-            "${STT_TEA_TYPE_WHITE}" | \
-            "${STT_TEA_TYPE_GREEN}" | \
-            "${STT_TEA_TYPE_GREEN}" | \
-            "${STT_TEA_TYPE_RED_SMALL}" | \
-            "${STT_TEA_TYPE_RED_LARGE}" | \
-            "${STT_TEA_TYPE_OOLONG_STRIP}" | \
-            "${STT_TEA_TYPE_OOLONG_ROLLED}" | \
-            "${STT_TEA_TYPE_PUERH_RAW}" | \
-            "${STT_TEA_TYPE_PUERH_RIPE}" | \
-            "${STT_TEA_DAY_DRINKING_DIVA}" | \
-            "${STT_TEA_YOUNG_GUSHU_2022}" | \
-            "test" )
-                stt::utils::write_param "tea_type" "${input}"
-
-                if [[ "${reset}" -eq 0 ]]; then
-                    echo
-                    ansi --bold "Do you want to reset infusion counter? [y/n]: "
-                    local answer
-                    read -r answer
-                    if [[ "${answer}" =~ ^[yY]$ ]]; then
-                        stt::reset_infusion_counter
-                    fi
-                    echo
-                fi
-            ;;
-
             * )
-                stt::utils::usage
-                stt::utils::terminate "Unknown option [${input}]."
+                if stt::set_variables_if_valid_tea_type "${input}"; then
+                    selected_tea=1
+                    TEA_TYPE="${input}"
+                else
+                    stt::utils::usage
+                    stt::utils::terminate "Unknown option [${input}]."
+                fi
         esac
 
         shift
     done
+
+    if [[ ${selected_tea} -ne 1 ]]; then
+        stt::utils::usage
+        stt::utils::terminate "You have to select a tea type."
+    fi
+
+    if [[ "${reset}" -eq 1 ]]; then
+        stt::reset_infusion_counter "${TEA_TYPE}"
+        echo
+        exit 0
+    fi
 }
 
 stt::inputparser::parse_input "${@}"
 
-tea_type="$(stt::utils::read_param "tea_type")" || exit ${?}
-
-case "${tea_type}" in
-    # infusion times set according Mei Leaf (https://meileaf.com)
-    # available at http://chinalifeweb.com/guides/the-tea-brewing-chart/
-    "${STT_TEA_TYPE_WHITE}" )
-        shift
-        stt::utils::write_param "tea_initial_infusion" "20"
-        stt::utils::write_param "tea_next_infusion" "10"
-    ;;
-
-    "${STT_TEA_TYPE_GREEN}" )
-        shift
-        stt::utils::write_param "tea_initial_infusion" "15"
-        stt::utils::write_param "tea_next_infusion" "3"
-    ;;
-
-    "${STT_TEA_TYPE_RED_SMALL}" )
-        shift
-        stt::utils::write_param "tea_initial_infusion" "10"
-        stt::utils::write_param "tea_next_infusion" "5"
-    ;;
-
-    "${STT_TEA_TYPE_RED_LARGE}" )
-        shift
-        stt::utils::write_param "tea_initial_infusion" "16"
-        stt::utils::write_param "tea_next_infusion" "5"
-    ;;
-
-    "${STT_TEA_TYPE_OOLONG_STRIP}" )
-        shift
-        stt::utils::write_param "tea_initial_infusion" "20"
-        stt::utils::write_param "tea_next_infusion" "5"
-    ;;
-
-    "${STT_TEA_TYPE_OOLONG_ROLLED}" )
-        shift
-        stt::utils::write_param "tea_initial_infusion" "25"
-        stt::utils::write_param "tea_next_infusion" "5"
-    ;;
-
-    "${STT_TEA_TYPE_PUERH_RAW}" )
-        shift
-        stt::utils::write_param "tea_initial_infusion" "10"
-        stt::utils::write_param "tea_next_infusion" "3"
-    ;;
-
-    "${STT_TEA_TYPE_PUERH_RIPE}" )
-        shift
-        stt::utils::write_param "tea_initial_infusion" "10"
-        stt::utils::write_param "tea_next_infusion" "5"
-    ;;
-
-    "${STT_TEA_DAY_DRINKING_DIVA}" )
-        shift
-        stt::utils::write_param "tea_initial_infusion" "20"
-        stt::utils::write_param "tea_next_infusion" "5"
-    ;;
-
-    "${STT_TEA_YOUNG_GUSHU_2022}" )
-        shift
-        stt::utils::write_param "tea_initial_infusion" "25"
-        stt::utils::write_param "tea_next_infusion" "5"
-    ;;
-
-    "test" )
-        shift
-        stt::utils::write_param "tea_initial_infusion" "2"
-        stt::utils::write_param "tea_next_infusion" "1"
-    ;;
-
-    * )
-        stt::utils::terminate "Unknown tea type [${tea_type}]."
-esac
-
-tea_initial_infusion="$(stt::utils::read_param "tea_initial_infusion")" || exit ${?}
-tea_next_infusion="$(stt::utils::read_param "tea_next_infusion")" || exit ${?}
-
-tea_infusion_counter="$(stt::utils::read_param_grace "tea_infusion_counter" || printf '0')"
-
+tea_infusion_counter="$(stt::utils::read_param_grace "${TEA_TYPE}" "tea_infusion_counter" || printf '0')"
 tea_infusion_counter="$(( tea_infusion_counter + 1 ))"
+stt::utils::write_param "${TEA_TYPE}" "tea_infusion_counter" "${tea_infusion_counter}"
 tea_infusion_counter_suffix=""
-
-stt::utils::write_param "tea_infusion_counter" "${tea_infusion_counter}"
 
 case $tea_infusion_counter in
     1) tea_infusion_counter_suffix="st";;
@@ -320,9 +308,9 @@ case $tea_infusion_counter in
     *) tea_infusion_counter_suffix="th";;
 esac
 
-tea_countdown="$(( tea_initial_infusion + (tea_infusion_counter - 1) * tea_next_infusion ))"
+tea_countdown="$(( TEA_INITIAL_INFUSION + (tea_infusion_counter - 1) * TEA_NEXT_INFUSION ))"
 
-echo "You are brewing $(ansi --bold "${tea_type}") tea."
+echo "You are brewing $(ansi --bold "${TEA_TYPE}") tea."
 echo "This is your $(ansi --bold "${tea_infusion_counter}${tea_infusion_counter_suffix}") infusion."
 echo "Infuse for $(ansi --bold "${tea_countdown}") seconds."
 stt:utils::wait_with_bar_counter "${tea_countdown}"
