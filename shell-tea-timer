@@ -13,6 +13,8 @@ readonly STT_TEA_TYPE_OOLONG_STRIP="oolong-strip"
 readonly STT_TEA_TYPE_OOLONG_ROLLED="oolong-ball"
 readonly STT_TEA_TYPE_PUERH_RAW="puerh-raw"
 readonly STT_TEA_TYPE_PUERH_RIPE="puerh-ripe"
+readonly STT_TEA_DAY_DRINKING_DIVA="day-drinking-diva"
+readonly STT_TEA_YOUNG_GUSHU_2022="young-gushu-2022"
 
 readonly STT_CONFIG_FILEPATH_ROOT="/tmp/shell-tea-timer"
 
@@ -144,6 +146,10 @@ function stt::utils::usage() {
     >&2 echo "            ${STT_TEA_TYPE_OOLONG_ROLLED} - oolong tea (balls)"
     >&2 echo "            ${STT_TEA_TYPE_PUERH_RAW} - raw (sheng, green) puerh tea"
     >&2 echo "            ${STT_TEA_TYPE_PUERH_RIPE} - ripe (shu, red) puerh tea"
+    >&2 echo
+    >&2 echo "            Actual teas:"
+    >&2 echo "                ${STT_TEA_DAY_DRINKING_DIVA} - Day Drinking Diva (raw, sheng)"
+    >&2 echo "                ${STT_TEA_YOUNG_GUSHU_2022} - Young Gushu 2022 (raw, sheng)"
 }
 
 function stt::utils::terminate() {
@@ -194,6 +200,8 @@ function stt::inputparser::parse_input() {
             "${STT_TEA_TYPE_OOLONG_ROLLED}" | \
             "${STT_TEA_TYPE_PUERH_RAW}" | \
             "${STT_TEA_TYPE_PUERH_RIPE}" | \
+            "${STT_TEA_DAY_DRINKING_DIVA}" | \
+            "${STT_TEA_YOUNG_GUSHU_2022}" | \
             "test" )
                 stt::utils::write_param "tea_type" "${input}"
 
@@ -270,6 +278,18 @@ case "${tea_type}" in
     "${STT_TEA_TYPE_PUERH_RIPE}" )
         shift
         stt::utils::write_param "tea_initial_infusion" "10"
+        stt::utils::write_param "tea_next_infusion" "5"
+    ;;
+
+    "${STT_TEA_DAY_DRINKING_DIVA}" )
+        shift
+        stt::utils::write_param "tea_initial_infusion" "20"
+        stt::utils::write_param "tea_next_infusion" "5"
+    ;;
+
+    "${STT_TEA_YOUNG_GUSHU_2022}" )
+        shift
+        stt::utils::write_param "tea_initial_infusion" "25"
         stt::utils::write_param "tea_next_infusion" "5"
     ;;
 
