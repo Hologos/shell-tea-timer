@@ -14,7 +14,7 @@ readonly CONF_DIRPATH="${SCRIPT_DIRPATH}/conf"
 readonly TEAS_CONF_DIRPATH="${CONF_DIRPATH}/teas"
 readonly POTS_CONF_DIRPATH="${CONF_DIRPATH}/pots"
 
-readonly SLOWNESS_COMPENSATION_FACTOR=1.2
+readonly SLOWNESS_COMPENSATION_FACTOR=1.68
 
 _DEBUG_COMPENSATION_FACTOR_CHECK_START=0
 _DEBUG_COMPENSATION_FACTOR_CHECK_FINISH=0
@@ -102,7 +102,7 @@ function stt:utils::wait_with_bar_counter() {
     local duration="${1}"
 
     local bar_length=10
-    local cycles_per_second=2
+    local cycles_per_second=10
     local decant_start_reported=0
     local pre post tick finished sleep_length decant_start
 
