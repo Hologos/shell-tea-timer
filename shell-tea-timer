@@ -259,7 +259,7 @@ function stt::water_temp() {
     echo "${TEA_BREWING_TEMP}$(printf '%s' $'\xc2\xb0')C"
 }
 
-function stt::infusion_number() {
+function stt::infusion_number_ordinal() {
     printf '%s' "${TEA_INFUSION_COUNTER}"
 
     case $TEA_INFUSION_COUNTER in
@@ -433,7 +433,7 @@ tea_countdown="$(( TEA_INITIAL_INFUSION_DURATION + (TEA_INFUSION_COUNTER - 1) * 
 
 echo
 echo "You are brewing $(ansi --bold "${TEA_NAME}") in $(ansi --bold "${POT}") pot."
-echo "This is your $(ansi --bold "$(stt::infusion_number)") infusion out of $(ansi --bold "${TEA_NUMBER_OF_INFUSIONS}")."
+echo "This is your $(ansi --bold "$(stt::infusion_number_ordinal)") infusion out of $(ansi --bold "${TEA_NUMBER_OF_INFUSIONS}")."
 echo "Infuse for $(ansi --bold "${tea_countdown} seconds") in $(ansi --bold "$(stt::water_temp)") water."
 echo "Decanting should start $(ansi --bold "$(stt::calculate_start_of_decanting "${tea_countdown}")") earlier."
 stt:utils::wait_with_bar_counter "${tea_countdown}"
