@@ -93,7 +93,7 @@ function stt:utils::repeat_char() {
         return
     fi
 
-    for i in ${range}; do
+    for start in ${range}; do
         printf '%s' "${str}"
     done
 }
@@ -303,6 +303,7 @@ function stt::setup_tea_params() {
     TEA="${tea}"
     tea_config_filepath="$(stt::utils::discover_tea_conf_files | grep "${tea}")" || return 1
 
+    # shellcheck source=conf/teas/green.conf
     source "${TEAS_CONF_DIRPATH}/${tea_config_filepath}"
 
     stt::utils::check_if_set "tea name" "${TEA_NAME}"
@@ -320,6 +321,7 @@ function stt::setup_pot_params() {
     POT="$(stt::utils::read_param "${tea}" "pot")" || exit ${?}
     pot_config_filepath="$(stt::utils::discover_pot_conf_files | grep "${POT}")" || return 1
 
+    # shellcheck source=conf/pots/glass.conf
     source "${POTS_CONF_DIRPATH}/${pot_config_filepath}"
 
     stt::utils::check_if_set "pot decant duration" "${POT_DECANT_DURATION}"
