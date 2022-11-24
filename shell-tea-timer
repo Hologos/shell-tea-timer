@@ -331,8 +331,8 @@ function stt::setup_pot_params() {
 function stt::setup_params_if_valid_tea() {
     local tea="${1}"
 
-    stt::setup_tea_params "${tea}"
-    stt::setup_pot_params "${tea}"
+    stt::setup_tea_params "${tea}" || return 1
+    stt::setup_pot_params "${tea}" || return 1
 
     return 0
 }
