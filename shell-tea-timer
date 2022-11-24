@@ -270,6 +270,16 @@ function stt::infusion_number_ordinal() {
     esac
 }
 
+function stt::infusion_number() {
+    printf '%s infusion' "${TEA_INFUSION_COUNTER}"
+
+    if [[ "${TEA_INFUSION_COUNTER}" -ne 1 ]]; then
+        echo "s"
+    else
+        echo
+    fi
+}
+
 function stt::calculate_amount() {
     echo "$(echo "scale=1;${POT_CAPACITY_WITH_LEAVES}/100*${TEA_AMOUNT_PER_100G}" | bc) g"
 }
@@ -337,6 +347,16 @@ function stt::setup_params_if_valid_tea() {
     return 0
 }
 
+function stt::setup_pot() {
+    echo
+    ansi --bold --no-newline "Choose a pot you want to brew in: "
+    POT="$(stt::utils::discover_pot_conf_files | rev | cut -c 6- | rev | sort | fzf)" || stt::utils::terminate "You have to choose a pot!"
+    stt::utils::write_param "${TEA}" "pot" "${POT}"
+    stt::setup_pot_params "${TEA}"
+    ansi --bold --no-newline "Choose a pot you want to brew in: "
+    ansi "${POT_NAME}"
+}
+
 function stt::setup() {
     # TODO: check if FZF is installed
     echo
@@ -346,15 +366,67 @@ function stt::setup() {
     ansi --bold --no-newline "Choose a tea you want to brew: "
     ansi "${TEA_NAME}"
 
-    echo
-    ansi --bold --no-newline "Choose a pot you want to brew in: "
-    POT="$(stt::utils::discover_pot_conf_files | rev | cut -c 6- | rev | sort | fzf)" || stt::utils::terminate "You have to choose a pot!"
-    stt::utils::write_param "${TEA}" "pot" "${POT}"
-    stt::setup_pot_params "${TEA}"
-    ansi --bold --no-newline "Choose a pot you want to brew in: "
-    ansi "${POT_NAME}"
+    TEA_INFUSION_COUNTER="$(stt::utils::read_param_grace "${TEA}" "tea_infusion_counter" || printf '0')"
+    POT="$(stt::utils::read_param_grace "${TEA}" "pot" || printf '%s' "${UNDEF_VALUE}")"
 
-    stt::reset_infusion_counter "${TEA}"
+    local ANSWER_NEW_SESSION="new session"
+    local ANSWER_RESET="reset infusion counter"
+    local ANSWER_SET="set infusion counter"
+    local action_message="What action do you want to do?"
+    local action answer
+    local action_list=( "${ANSWER_NEW_SESSION}" )
+
+    if [[ "${TEA_INFUSION_COUNTER}" -gt 0 ]]; then
+        action_message="Previous session found with $(stt::infusion_number). ${action_message}"
+        action_list+=( "${ANSWER_RESET}" "${ANSWER_SET}" )
+    else
+        action_list+=( "${ANSWER_SET}" )
+    fi
+
+    if [[ "${POT}" != "${UNDEF_VALUE}" ]]; then
+        stt::setup_pot_params "${TEA}"
+    fi
+
+    # ověřit, že to není nějaké mega staré
+
+    echo
+    ansi --bold --no-newline "${action_message} "
+    action="$(echo -e "$(IFS=$'\n'; printf '%s' "${action_list[*]}")" | fzf)" || stt::utils::terminate "You have to choose an action!"
+    stt::setup_tea_params "${TEA}"
+    ansi --bold --no-newline "${action_message} "
+    ansi "${action}"
+
+    case "${action}" in
+        "${ANSWER_NEW_SESSION}" )
+            stt::setup_pot
+        ;;
+
+        "${ANSWER_RESET}" )
+            stt::reset_infusion_counter "${TEA}"
+
+            # maybe ask, if wants to set pot?
+            stt::setup_pot
+        ;;
+
+        "${ANSWER_SET}" )
+            echo
+            ansi --bold --no-newline "How many infusions have you had? "
+            read -r answer
+
+            if [[ "${answer}" =~ ^[0-9]+$ ]]; then
+                stt::utils::write_param "${TEA}" "tea_infusion_counter" "${answer}"
+            else
+                stt::utils::terminate "[${answer}] is not a number!"
+            fi
+
+            if [[ "${POT}" != "${UNDEF_VALUE}" ]]; then
+                stt::setup_pot
+            fi
+        ;;
+
+        * )
+            stt::utils::terminate "Unknown action [${action}]."
+    esac
 
     echo
     echo "Heat your water to $(ansi --bold "$(stt::water_temp)")."
@@ -419,7 +491,6 @@ function stt::inputparser::parse_input() {
 stt::inputparser::parse_input "${@}"
 
 stt::utils::check_if_set "tea type" "${TEA}"
-TEA_INFUSION_COUNTER="$(stt::utils::read_param_grace "${TEA}" "tea_infusion_counter" || printf '0')"
 TEA_INFUSION_COUNTER="$(( TEA_INFUSION_COUNTER + 1 ))"
 stt::utils::write_param "${TEA}" "tea_infusion_counter" "${TEA_INFUSION_COUNTER}"
 
