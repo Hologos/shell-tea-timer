@@ -481,6 +481,8 @@ function stt::inputparser::parse_input() {
         stt::utils::terminate "You have to select a tea."
     fi
 
+    stt::utils::check_if_set "tea type" "${TEA}"
+
     if [[ "${reset}" -eq 1 ]]; then
         stt::reset_infusion_counter "${TEA}"
         echo
@@ -490,7 +492,6 @@ function stt::inputparser::parse_input() {
 
 stt::inputparser::parse_input "${@}"
 
-stt::utils::check_if_set "tea type" "${TEA}"
 TEA_INFUSION_COUNTER="$(( TEA_INFUSION_COUNTER + 1 ))"
 stt::utils::write_param "${TEA}" "tea_infusion_counter" "${TEA_INFUSION_COUNTER}"
 
