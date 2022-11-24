@@ -341,14 +341,14 @@ function stt::setup() {
     # TODO: check if FZF is installed
     echo
     ansi --bold --no-newline "Choose a tea you want to brew: "
-    TEA="$(stt::utils::discover_tea_conf_files | rev | cut -c 6- | rev | sort | fzf)"
+    TEA="$(stt::utils::discover_tea_conf_files | rev | cut -c 6- | rev | sort | fzf)" || stt::utils::terminate "You have to choose a tea!"
     stt::setup_tea_params "${TEA}"
     ansi --bold --no-newline "Choose a tea you want to brew: "
     ansi "${TEA_NAME}"
 
     echo
     ansi --bold --no-newline "Choose a pot you want to brew in: "
-    POT="$(stt::utils::discover_pot_conf_files | rev | cut -c 6- | rev | sort | fzf)"
+    POT="$(stt::utils::discover_pot_conf_files | rev | cut -c 6- | rev | sort | fzf)" || stt::utils::terminate "You have to choose a pot!"
     stt::utils::write_param "${TEA}" "pot" "${POT}"
     stt::setup_pot_params "${TEA}"
     ansi --bold --no-newline "Choose a pot you want to brew in: "
