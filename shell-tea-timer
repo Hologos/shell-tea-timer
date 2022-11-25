@@ -168,7 +168,7 @@ function stt:utils::wait_with_bar_counter() {
     _DEBUG_COMPENSATION_FACTOR_CHECK_START="${SECONDS}"
 
     sleep_length="$(echo "scale=2;1/${cycles_per_second}" | bc)"
-    decant_start="$(stt::calculate_start_of_decanting_raw_new)"
+    decant_start="$(stt::calculate_start_of_decanting_raw)"
     datetime_start="$(stt:utils::get_current_datetime)"
 
     echo
@@ -355,30 +355,15 @@ function stt::calculate_amount() {
     echo "$(echo "scale=1;${POT_CAPACITY_WITH_LEAVES}/100*${TEA_AMOUNT_PER_100G}" | bc) g"
 }
 
-function stt::calculate_start_of_decanting_raw_new() {
+function stt::calculate_start_of_decanting_raw() {
     echo "scale=0;(${POT_DECANT_DURATION}*${DECANT_RATIO})/1" | bc
 }
 
-function stt::calculate_start_of_decanting_raw() {
-    local tea_countdown="${1}"
-    local ratio=0.6
-
-    echo "scale=0;(${POT_DECANT_DURATION}*${ratio})/1" | bc
-}
-
 function stt::calculate_start_of_decanting() {
-    local tea_countdown="${1}"
     local start_of_decanting
+    start_of_decanting="$(stt::calculate_start_of_decanting_raw)"
 
-    start_of_decanting="$(stt::calculate_start_of_decanting_raw "${tea_countdown}")"
-
-    printf '%s second' "${start_of_decanting}"
-
-    if [[ "${start_of_decanting}" -ne 1 ]]; then
-        echo "s"
-    else
-        echo
-    fi
+    printf '%s' "$(stt::utils::report_seconds "${start_of_decanting}")"
 }
 
 function stt::setup_tea_params() {
@@ -593,8 +578,9 @@ echo
 echo "You are brewing $(ansi --bold "${TEA_NAME}") in $(ansi --bold "${POT_NAME}") pot."
 echo "This is your $(ansi --bold "$(stt::infusion_number_ordinal)") infusion out of $(ansi --bold "${TEA_NUMBER_OF_INFUSIONS}")."
 echo "Infuse for $(ansi --bold "${tea_countdown} seconds") in $(ansi --bold "$(stt::water_temp)") water."
-echo "Decanting should start $(ansi --bold "$(stt::calculate_start_of_decanting "${tea_countdown}")") earlier."
+echo "Decanting should start $(ansi --bold "$(stt::calculate_start_of_decanting)") earlier."
 stt:utils::wait_with_bar_counter "${tea_countdown}"
 echo "Decant your tea now!"
 say "Do píči čaj."
+
 stt::debug::report_compensasion_factor
