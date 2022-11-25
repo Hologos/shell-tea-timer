@@ -344,6 +344,8 @@ function stt::setup_params_if_valid_tea() {
     stt::setup_tea_params "${tea}" || return 1
     stt::setup_pot_params "${tea}" || return 1
 
+    TEA_INFUSION_COUNTER="$(stt::utils::read_param_grace "${TEA}" "tea_infusion_counter" || printf '0')"
+
     return 0
 }
 
