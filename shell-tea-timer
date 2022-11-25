@@ -2,6 +2,14 @@
 
 set -uo pipefail
 
+# -- absolute dirpath ---------------------------------------------------------
+
+ABSOLUTE_DIRPATH="$( cd "$( dirname "$( [[ -L "${BASH_SOURCE[0]}" ]] && readlink "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}" )" )" && pwd )" || { \
+    >&2 echo
+    >&2 echo "Cannot determine real path of the script."
+    exit 1
+}
+
 readonly _STT_RESET_OPTION="r"
 readonly _STT_HELP_OPTION="h"
 readonly _STT_SETUP_ARGUMENT="setup"
@@ -9,8 +17,7 @@ readonly _STT_SETUP_ARGUMENT="setup"
 readonly STT_CONFIG_FILEPATH_ROOT="/tmp/shell-tea-timer"
 readonly UNDEF_VALUE="undef"
 
-readonly SCRIPT_DIRPATH="${HOME}/Scripts/shell-tea-timer"
-readonly CONF_DIRPATH="${SCRIPT_DIRPATH}/conf"
+readonly CONF_DIRPATH="${ABSOLUTE_DIRPATH}/conf"
 readonly TEAS_CONF_DIRPATH="${CONF_DIRPATH}/teas"
 readonly POTS_CONF_DIRPATH="${CONF_DIRPATH}/pots"
 
