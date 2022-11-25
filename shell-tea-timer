@@ -10,6 +10,8 @@ ABSOLUTE_DIRPATH="$( cd "$( dirname "$( [[ -L "${BASH_SOURCE[0]}" ]] && readlink
     exit 1
 }
 
+# -- global variables ---------------------------------------------------------
+
 readonly _STT_RESET_OPTION="r"
 readonly _STT_HELP_OPTION="h"
 readonly _STT_SETUP_ARGUMENT="setup"
@@ -38,6 +40,8 @@ POT_DECANT_DURATION="${UNDEF_VALUE}"
 TEA_BREWING_TEMP="${UNDEF_VALUE}"
 TEA_AMOUNT_PER_100G="${UNDEF_VALUE}"
 POT_CAPACITY_WITH_LEAVES="${UNDEF_VALUE}"
+
+# -- function definition ------------------------------------------------------
 
 function stt::debug::report_compensasion_factor() {
     local real_world_duration duration_diff slowness_compensation_factor
@@ -503,6 +507,8 @@ function stt::inputparser::parse_input() {
     fi
 }
 
+# -- initial setup ------------------------------------------------------------
+
 stt::inputparser::parse_input "${@}"
 
 TEA_INFUSION_COUNTER="$(( TEA_INFUSION_COUNTER + 1 ))"
@@ -513,6 +519,8 @@ if [[ "${TEA_INFUSION_COUNTER}" -eq "${TEA_NUMBER_OF_INFUSIONS}" ]]; then
 elif [[ "${TEA_INFUSION_COUNTER}" -gt "${TEA_NUMBER_OF_INFUSIONS}" ]]; then
     say "Už jsi přes čáru." &
 fi
+
+# -- main program -------------------------------------------------------------
 
 tea_countdown="$(( TEA_INITIAL_INFUSION_DURATION + (TEA_INFUSION_COUNTER - 1) * TEA_NEXT_INFUSION_DURATION ))"
 
