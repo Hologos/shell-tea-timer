@@ -23,9 +23,10 @@ readonly CONF_DIRPATH="${ABSOLUTE_DIRPATH}/conf"
 readonly TEAS_CONF_DIRPATH="${CONF_DIRPATH}/teas"
 readonly POTS_CONF_DIRPATH="${CONF_DIRPATH}/pots"
 
-readonly SLOWNESS_COMPENSATION_FACTOR=1.68
+readonly SLOWNESS_COMPENSATION_FACTOR=1
 
 readonly MINIMUM_DECANT_TIME=3
+readonly DECANT_RATIO=0.6
 
 _DEBUG_COMPENSATION_FACTOR_CHECK_START=0
 _DEBUG_COMPENSATION_FACTOR_CHECK_FINISH=0
@@ -111,35 +112,91 @@ function stt:utils::repeat_char() {
     done
 }
 
+function stt::utils::report_seconds() {
+    local seconds="${1}"
+    local placeholder="second"
+
+    if [[ "${seconds}" -ne 1 ]]; then
+        placeholder+="s"
+    fi
+
+    printf '%s %s' "${seconds}" "${placeholder}"
+}
+
+function stt::utils::get_elapsed_time() {
+    local old_time="${1}"
+    local new_time="${2}"
+
+    gdate -d "${new_time} $(gdate -d "${old_time}" +%s.%N) seconds ago" +%s.%3N
+}
+
+function stt:utils::get_current_datetime() {
+    gdate +'%Y-%m-%d %H:%M:%S.%N'
+}
+
+function stt::utils::get_finished_percentage() {
+    local finished_amount="${1}"
+    local total="${2}"
+
+    finished_percents="$(echo "((${finished_amount}) * 100 / ${total}) / 1" | bc)"
+
+    if [[ "${finished_percents}" -gt 100 ]]; then
+        printf '%s' "100"
+        return
+    fi
+
+    printf '%s' "${finished_percents}"
+}
+
 function stt:utils::wait_with_bar_counter() {
     local duration="${1}"
 
     local bar_length=10
     local cycles_per_second=10
-    local decant_start_reported=0
-    local pre post tick finished sleep_length decant_start
+
+    local sleep_length
+    local decant_start
+    local datetime_start
+    local datetime_current
+    local sec_milisec_diff
+    local seconds_left
+    local finished_percents
+    local chars_pre
+    local chars_post
 
     _DEBUG_COMPENSATION_FACTOR_CHECK_DESIRED_DURATION="${duration}"
     _DEBUG_COMPENSATION_FACTOR_CHECK_START="${SECONDS}"
 
-    duration="$(( duration * cycles_per_second ))"
-    sleep_length="$(echo "scale=2;(1/${cycles_per_second})/${SLOWNESS_COMPENSATION_FACTOR}" | bc)"
-    tick="$(echo "scale=2;${bar_length}/${duration}" | bc)"
-    decant_start="$(stt::calculate_start_of_decanting_raw "${duration}")"
+    sleep_length="$(echo "scale=2;1/${cycles_per_second}" | bc)"
+    decant_start="$(stt::calculate_start_of_decanting_raw_new)"
+    datetime_start="$(stt:utils::get_current_datetime)"
 
     echo
 
     while true; do
-        post="$(echo "$(echo "scale=2;${duration} * ${tick}" | bc) / 1" | bc)"
-        done="$(echo "scale=2;${bar_length} - (${duration} * ${tick})" | bc)"
-        pre="$(echo "scale=2;${bar_length} - ${post}" | bc)"
-        finished="$(echo "(${done} * 100 / ${bar_length}) / 1" | bc)"
-        seconds_left="$(( duration / cycles_per_second ))"
-        seconds_suffix="s"
+        datetime_current="$(stt:utils::get_current_datetime)"
+        sec_milisec_diff="$(stt::utils::get_elapsed_time "${datetime_start}" "${datetime_current}")"
+        seconds_left="$(echo "scale=0;(${duration} - ${sec_milisec_diff} + 1)/1" | bc)" # +1 due to how rounding -0.xx works
+        finished_percents="$(stt::utils::get_finished_percentage "${sec_milisec_diff}" "${duration}")"
 
-        if [[ "${seconds_left}" =~ ^1$ ]]; then
-            seconds_suffix=""
-        fi
+        chars_pre="$(echo "scale=0;(${finished_percents}/${bar_length})/1" | bc)"
+        chars_post="$(echo "scale=0;${bar_length} - ${chars_pre}" | bc)"
+
+        # echo "duration=[${duration}]"
+        # echo "sleep_length=[${sleep_length}]"
+        # echo "decant_start=[${decant_start}]"
+        # echo "datetime_start=[${datetime_start}]"
+        # echo "datetime_current=[${datetime_current}]"
+        # echo "sec_milisec_diff=[${sec_milisec_diff}]"
+        # echo "seconds_left=[${seconds_left}]"
+        # echo
+        # echo "finished_percents=[${finished_percents}]"
+        # echo "bar_length=[${bar_length}]"
+        # echo "chars_pre=[${chars_pre}]"
+        # echo "chars_post=[${chars_post}]"
+        # echo
+        # echo "-----------------------------------------"
+        # echo
 
         if [[ "${seconds_left}" -eq "${decant_start}" ]] && \
            [[ "${decant_start}" -ge "${MINIMUM_DECANT_TIME}" ]] && \
@@ -153,12 +210,12 @@ function stt:utils::wait_with_bar_counter() {
         echo -n
 
         printf '%s' '<'
-        stt:utils::repeat_char "${pre}" "="
-        stt:utils::repeat_char "${post}" " "
+        stt:utils::repeat_char "${chars_pre}" "="
+        stt:utils::repeat_char "${chars_post}" " "
         printf '%s' '>  '
-        printf '%s%% finished (%s second%s)' "${finished}" "${seconds_left}" "${seconds_suffix}"
+        printf '%s%% finished (%s)' "${finished_percents}" "$(stt::utils::report_seconds "${seconds_left}")"
 
-        if [[ "$(( duration-- ))" -lt 1 ]]; then
+        if [[ "${seconds_left}" -le 0 ]]; then
             echo
             break
         else
@@ -296,6 +353,10 @@ function stt::infusion_number() {
 
 function stt::calculate_amount() {
     echo "$(echo "scale=1;${POT_CAPACITY_WITH_LEAVES}/100*${TEA_AMOUNT_PER_100G}" | bc) g"
+}
+
+function stt::calculate_start_of_decanting_raw_new() {
+    echo "scale=0;(${POT_DECANT_DURATION}*${DECANT_RATIO})/1" | bc
 }
 
 function stt::calculate_start_of_decanting_raw() {
