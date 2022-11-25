@@ -364,6 +364,10 @@ function stt::setup_params_if_valid_tea() {
     return 0
 }
 
+function stt::get_start_command() {
+    printf '%s %s' "$(basename "${0}")" "${TEA}"
+}
+
 function stt::setup_pot() {
     echo
     ansi --bold --no-newline "Choose a pot you want to brew in: "
@@ -451,7 +455,8 @@ function stt::setup() {
     echo
     echo "Use $(ansi --bold "$(stt::calculate_amount)") of leaves (${TEA_AMOUNT_PER_100G} g per 100 ml, pot capacity is ${POT_CAPACITY_WITH_LEAVES} ml)."
 
-    local command="${0} ${TEA}"
+    local command
+    command="$(stt::get_start_command)"
 
     echo
     ansi --bold "Your command has been copied to your clipboard!"
