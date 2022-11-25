@@ -64,6 +64,12 @@ function stt::debug::report_compensasion_factor() {
     echo "Slowness compensation factor should be [${slowness_compensation_factor}] (set value is [${SLOWNESS_COMPENSATION_FACTOR}])."
 }
 
+function stt::utils::is_installed() {
+    command which "${1}" &> /dev/null && return 0
+
+    return 1
+}
+
 function stt::utils::terminate() {
     local exit_code="1"
     local message=""
@@ -508,6 +514,16 @@ function stt::setup() {
     printf "%s" "${command}" | pbcopy
 }
 
+function stt::utils::check_prerequisites() {
+    if ! stt::utils::is_installed "fzf"; then
+        stt::utils::terminate "fzf is not installed"
+    fi
+
+    if ! stt::utils::is_installed "gdate"; then
+        stt::utils::terminate "gdate is not installed"
+    fi
+}
+
 function stt::inputparser::parse_input() {
     local reset=0
     local selected_tea=0
@@ -558,6 +574,8 @@ function stt::inputparser::parse_input() {
 }
 
 # -- initial setup ------------------------------------------------------------
+
+stt::utils::check_prerequisites
 
 stt::inputparser::parse_input "${@}"
 
