@@ -229,7 +229,6 @@ function stt::utils::discover_pot_conf_files() {
     stt::utils::discover_files "${POTS_CONF_DIRPATH}" "conf"
 }
 
-
 function stt::utils::usage() {
     # shellcheck disable=SC2155
     local fmt_bold="$(ansi --bold --no-restore)"
@@ -530,7 +529,7 @@ fi
 tea_countdown="$(( TEA_INITIAL_INFUSION_DURATION + (TEA_INFUSION_COUNTER - 1) * TEA_NEXT_INFUSION_DURATION ))"
 
 echo
-echo "You are brewing $(ansi --bold "${TEA_NAME}") in $(ansi --bold "${POT}") pot."
+echo "You are brewing $(ansi --bold "${TEA_NAME}") in $(ansi --bold "${POT_NAME}") pot."
 echo "This is your $(ansi --bold "$(stt::infusion_number_ordinal)") infusion out of $(ansi --bold "${TEA_NUMBER_OF_INFUSIONS}")."
 echo "Infuse for $(ansi --bold "${tea_countdown} seconds") in $(ansi --bold "$(stt::water_temp)") water."
 echo "Decanting should start $(ansi --bold "$(stt::calculate_start_of_decanting "${tea_countdown}")") earlier."
