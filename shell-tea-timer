@@ -36,10 +36,6 @@ ABSOLUTE_DIRPATH="$( cd "$( dirname "$( [[ -L "${BASH_SOURCE[0]}" ]] && readlink
 
 # -- global variables ---------------------------------------------------------
 
-readonly _STT_RESET_OPTION="r"
-readonly _STT_HELP_OPTION="h"
-readonly _STT_SETUP_ARGUMENT="setup"
-
 readonly UNDEF_VALUE="undef"
 
 readonly LIBS_DIRPATH="${ABSOLUTE_DIRPATH}/libs"

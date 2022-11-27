@@ -1,5 +1,9 @@
 #! /usr/bin/env bash
 
+readonly _OPTION_RESET="r"
+readonly _OPTION_HELP="h"
+
+readonly _ARGUMENT_SETUP="setup"
 
 function stt::inputparse::usage() {
     # shellcheck disable=SC2155
@@ -11,15 +15,15 @@ function stt::inputparse::usage() {
     local tea
 
     >&2 echo
-    >&2 echo "Usage: ${0} [-${_STT_HELP_OPTION}] [-${_STT_RESET_OPTION}] [<${_STT_SETUP_ARGUMENT}> | <tea>]"
+    >&2 echo "Usage: ${0} [-${_OPTION_HELP}] [-${_OPTION_RESET}] [<${_ARGUMENT_SETUP}> | <tea>]"
     >&2 echo
-    >&2 echo "    ${fmt_bold}-${_STT_HELP_OPTION}${fmt_reset}"
+    >&2 echo "    ${fmt_bold}-${_OPTION_HELP}${fmt_reset}"
     >&2 echo "        Prints this help."
     >&2 echo
-    >&2 echo "    ${fmt_bold}-${_STT_RESET_OPTION}${fmt_reset}"
+    >&2 echo "    ${fmt_bold}-${_OPTION_RESET}${fmt_reset}"
     >&2 echo "        Resets infusion counters."
     >&2 echo
-    >&2 echo "    ${fmt_bold}<${_STT_SETUP_ARGUMENT}>${fmt_reset}"
+    >&2 echo "    ${fmt_bold}<${_ARGUMENT_SETUP}>${fmt_reset}"
     >&2 echo "        Perform setup of tea and pot."
     >&2 echo
     >&2 echo "    ${fmt_bold}<tea>${fmt_reset}"
@@ -41,16 +45,16 @@ function stt::inputparser::parse_input() {
 
         case "${input}" in
 
-            "-${_STT_RESET_OPTION}" )
+            "-${_OPTION_RESET}" )
                 reset=1
             ;;
 
-            "-${_STT_HELP_OPTION}" )
+            "-${_OPTION_HELP}" )
                 stt::inputparse::usage
                 stt::utils::terminate
             ;;
 
-            "${_STT_SETUP_ARGUMENT}" )
+            "${_ARGUMENT_SETUP}" )
                 stt::setup::setup
                 exit 0
             ;;
