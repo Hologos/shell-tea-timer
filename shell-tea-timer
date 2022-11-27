@@ -87,40 +87,6 @@ POT_CAPACITY_WITH_LEAVES="${UNDEF_VALUE}"
 # shellcheck source=libs/debug
 . "${LIBS_DIRPATH}/debug"
 
-# -- function definition ------------------------------------------------------
-
-function stt::reset_infusion_counter() {
-    local tea="${1}"
-
-    stt::io::write_param "${tea}" "${IO_PARAM_TEA_INFUSION_COUNTER}" "0"
-
-    echo
-    echo "Reseting $(ansi --bold "${TEA_NAME}") infusion counter."
-}
-
-function stt::water_temp() {
-    echo "${TEA_BREWING_TEMP}$(printf '%s' $'\xc2\xb0')C"
-}
-
-function stt::calculate_amount() {
-    echo "$(echo "scale=1;${POT_CAPACITY_WITH_LEAVES}/100*${TEA_AMOUNT_PER_100G}" | bc) g"
-}
-
-function stt::calculate_start_of_decanting_raw() {
-    echo "scale=0;(${POT_DECANT_DURATION}*${DECANT_RATIO})/1" | bc
-}
-
-function stt::calculate_start_of_decanting() {
-    local start_of_decanting
-    start_of_decanting="$(stt::calculate_start_of_decanting_raw)"
-
-    printf '%s' "$(stt::format::format_seconds "${start_of_decanting}")"
-}
-
-function stt::get_start_command() {
-    printf '%s %s' "$(basename "${0}")" "${TEA}"
-}
-
 # -- initial setup ------------------------------------------------------------
 
 stt::utils::check_prerequisites
@@ -143,8 +109,8 @@ tea_countdown="$(( TEA_INITIAL_INFUSION_DURATION + (TEA_INFUSION_COUNTER - 1) * 
 echo
 echo "You are brewing $(ansi --bold "${TEA_NAME}") in $(ansi --bold "${POT_NAME}") pot."
 echo "This is your $(ansi --bold "$(stt::format::format_infusion_number_ordinal)") infusion out of $(ansi --bold "${TEA_NUMBER_OF_INFUSIONS}")."
-echo "Infuse for $(ansi --bold "${tea_countdown} seconds") in $(ansi --bold "$(stt::water_temp)") water."
-echo "Decanting should start $(ansi --bold "$(stt::calculate_start_of_decanting)") earlier."
+echo "Infuse for $(ansi --bold "${tea_countdown} seconds") in $(ansi --bold "$(stt::helpers::water_temp)") water."
+echo "Decanting should start $(ansi --bold "$(stt::helpers::calculate_start_of_decanting)") earlier."
 stt::gfx::countdown_start "${tea_countdown}"
 echo "Decant your tea now!"
 say "Do píči čaj."

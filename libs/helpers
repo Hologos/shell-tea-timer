@@ -1,1 +1,24 @@
 #! /usr/bin/env bash
+
+function stt::helpers::water_temp() {
+    echo "${TEA_BREWING_TEMP}$(printf '%s' $'\xc2\xb0')C"
+}
+
+function stt::helpers::calculate_leaves_amount() {
+    echo "$(echo "scale=1;${POT_CAPACITY_WITH_LEAVES}/100*${TEA_AMOUNT_PER_100G}" | bc) g"
+}
+
+function stt::helpers::calculate_start_of_decanting_raw() {
+    echo "scale=0;(${POT_DECANT_DURATION}*${DECANT_RATIO})/1" | bc
+}
+
+function stt::helpers::calculate_start_of_decanting() {
+    local start_of_decanting
+    start_of_decanting="$(stt::helpers::calculate_start_of_decanting_raw)"
+
+    printf '%s' "$(stt::format::format_seconds "${start_of_decanting}")"
+}
+
+function stt::helpers::get_start_command() {
+    printf '%s %s' "$(basename "${0}")" "${TEA}"
+}

@@ -98,7 +98,7 @@ function stt::setup::setup() {
         ;;
 
         "${ANSWER_RESET}" )
-            stt::reset_infusion_counter "${TEA}"
+            stt::io::reset_infusion_counter "${TEA}"
 
             # TODO: maybe ask, if wants to set pot?
             stt::setup::setup_pot
@@ -125,13 +125,13 @@ function stt::setup::setup() {
     esac
 
     echo
-    echo "Heat your water to $(ansi --bold "$(stt::water_temp)")."
+    echo "Heat your water to $(ansi --bold "$(stt::helpers::water_temp)")."
 
     echo
-    echo "Use $(ansi --bold "$(stt::calculate_amount)") of leaves (${TEA_AMOUNT_PER_100G} g per 100 ml, pot capacity is ${POT_CAPACITY_WITH_LEAVES} ml)."
+    echo "Use $(ansi --bold "$(stt::helpers::calculate_leaves_amount)") of leaves (${TEA_AMOUNT_PER_100G} g per 100 ml, pot capacity is ${POT_CAPACITY_WITH_LEAVES} ml)."
 
     local command
-    command="$(stt::get_start_command)"
+    command="$(stt::helpers::get_start_command)"
 
     echo
     ansi --bold "Your command has been copied to your clipboard!"

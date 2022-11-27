@@ -20,7 +20,7 @@ function stt::gfx::countdown_start() {
     _DEBUG_COMPENSATION_FACTOR_CHECK_START="${SECONDS}"
 
     sleep_length="$(echo "scale=2;1/${cycles_per_second}" | bc)"
-    decant_start="$(stt::calculate_start_of_decanting_raw)"
+    decant_start="$(stt::helpers::calculate_start_of_decanting_raw)"
     datetime_start="$(stt:utils::get_current_datetime)"
 
     echo

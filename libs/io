@@ -58,7 +58,7 @@ function stt::io::discover_tea_conf_files() {
     stt::io::discover_files "${TEAS_CONF_DIRPATH}" "${_IO_CONFIG_FILE_EXTENSION}"
 }
 
-function stt::utils::discover_teas() {
+function stt::io::discover_teas() {
     stt::io::discover_tea_conf_files | rev | cut -c 6- | rev | sort
 }
 
@@ -81,4 +81,13 @@ function stt::io::init() {
     readonly CONF_DIRPATH="${STT_CONFIG_DITPATH}/conf"
     readonly TEAS_CONF_DIRPATH="${CONF_DIRPATH}/teas"
     readonly POTS_CONF_DIRPATH="${CONF_DIRPATH}/pots"
+}
+
+function stt::io::reset_infusion_counter() {
+    local tea="${1}"
+
+    stt::io::write_param "${tea}" "${IO_PARAM_TEA_INFUSION_COUNTER}" "0"
+
+    echo
+    echo "Reseting $(ansi --bold "${TEA_NAME}") infusion counter."
 }
