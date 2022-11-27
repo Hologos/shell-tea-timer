@@ -2,6 +2,31 @@
 
 set -euo pipefail
 
+# -- global variables ---------------------------------------------------------
+
+readonly STT_OS_LINUX="linux"
+readonly STT_OS_MACOS="macos"
+
+STT_OS="$(uname)"
+
+# -- os detection -------------------------------------------------------------
+
+# checks if this is supported OS
+case "${STT_OS}" in
+    Linux)
+        STT_OS="${STT_OS_LINUX}"
+    ;;
+
+    Darwin)
+        STT_OS="${STT_OS_MACOS}"
+    ;;
+
+    *)
+        >&2 echo
+        >&2 echo "[${STT_OS}] is not supported operating system."
+        exit 1
+esac
+
 # -- absolute dirpath ---------------------------------------------------------
 
 ABSOLUTE_DIRPATH="$( cd "$( dirname "$( [[ -L "${BASH_SOURCE[0]}" ]] && readlink "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}" )" )" && pwd )" || { \
