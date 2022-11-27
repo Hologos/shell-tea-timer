@@ -51,12 +51,12 @@ function stt::inputparser::parse_input() {
             ;;
 
             "${_STT_SETUP_ARGUMENT}" )
-                stt::setup
+                stt::setup::setup
                 exit 0
             ;;
 
             * )
-                if stt::setup_params_if_valid_tea "${input}"; then
+                if stt::setup::setup_params_if_valid_tea "${input}"; then
                     selected_tea=1
                 else
                     stt::inputparse::usage
