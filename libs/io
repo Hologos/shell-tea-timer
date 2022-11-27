@@ -65,3 +65,20 @@ function stt::utils::discover_teas() {
 function stt::io::discover_pot_conf_files() {
     stt::io::discover_files "${POTS_CONF_DIRPATH}" "${_IO_CONFIG_FILE_EXTENSION}"
 }
+
+function stt::io::init() {
+    if [[ -z "${STT_CONFIG_DITPATH+_}" ]]; then
+        stt::inputparser::usage
+        stt::utils::terminate "Environment variable STT_CONFIG_DITPATH is not set and dirpath was not passed via an argument."
+    fi
+
+    if [[ ! -e "${STT_CONFIG_DITPATH}" ]]; then
+        stt::utils::terminate "Configuration dirpath [${STT_CONFIG_DITPATH}] doesn't exist."
+    elif [[ ! -d "${STT_CONFIG_DITPATH}" ]]; then
+        stt::utils::terminate "[${STT_CONFIG_DITPATH}] is not a directory."
+    fi
+
+    readonly CONF_DIRPATH="${STT_CONFIG_DITPATH}/conf"
+    readonly TEAS_CONF_DIRPATH="${CONF_DIRPATH}/teas"
+    readonly POTS_CONF_DIRPATH="${CONF_DIRPATH}/pots"
+}

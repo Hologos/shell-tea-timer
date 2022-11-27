@@ -40,9 +40,6 @@ readonly UNDEF_VALUE="undef"
 
 readonly LIBS_DIRPATH="${ABSOLUTE_DIRPATH}/libs"
 readonly VENDOR_DIRPATH="${ABSOLUTE_DIRPATH}/vendor"
-readonly CONF_DIRPATH="${ABSOLUTE_DIRPATH}/conf"
-readonly TEAS_CONF_DIRPATH="${CONF_DIRPATH}/teas"
-readonly POTS_CONF_DIRPATH="${CONF_DIRPATH}/pots"
 
 readonly SLOWNESS_COMPENSATION_FACTOR=1
 

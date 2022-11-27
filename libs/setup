@@ -7,7 +7,7 @@ function stt::setup::setup_tea_params() {
     TEA="${tea}"
     tea_config_filepath="$(stt::io::discover_tea_conf_files | grep "${tea}")" || return 1
 
-    # shellcheck source=../conf/teas/green.conf
+    # shellcheck source=../conf/teas/generic-green.conf
     source "${TEAS_CONF_DIRPATH}/${tea_config_filepath}"
 
     stt::utils::check_if_set "tea name" "${TEA_NAME}"
@@ -25,7 +25,7 @@ function stt::setup::setup_pot_params() {
     POT="$(stt::io::read_param "${tea}" "${IO_PARAM_POT}")" || exit ${?}
     pot_config_filepath="$(stt::io::discover_pot_conf_files | grep "${POT}")" || return 1
 
-    # shellcheck source=../conf/pots/glass.conf
+    # shellcheck source=../conf/pots/generic-pot.conf
     source "${POTS_CONF_DIRPATH}/${pot_config_filepath}"
 
     stt::utils::check_if_set "pot name" "${POT_NAME}"

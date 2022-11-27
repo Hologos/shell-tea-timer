@@ -13,7 +13,7 @@ TODO: script output
 **Important:** bash v3.2 and higher is required
 
 1) Download archive from [the release page](https://github.com/Hologos/shell-tea-timer/releases) and unpack it.
-2) Create `stt.cfg` file (follow instructions in section [Configuration file](#configuration-file)) or pass the configuration as arguments.
+2) Create tea and pot configuration files (follow instructions in section [Configuration files](#configuration-file)).
 3) Run the script.
 
 ### Dependencies
@@ -42,17 +42,41 @@ peru sync
 ### Usage
 
 ```
-TODO: usage
+shell-tea-timer [-h] [-c <configs-dirpath>]
+
+    -h
+        Prints this help.
+
+    -c <configs-dirpath>
+        Dirpath to configs directory.
+
+Environment variables
+    STT_CONFIG_DITPATH - dirpath to configs directory
 ```
 
-You either have to specify the filepath to configuration file via an argument `-c` or you can set an environment variable `STT_CONFIG_FILEPATH`.
+You either have to specify the dirpath to configuration files via an argument `-c` or you can set an environment variable `STT_CONFIG_DITPATH`.
 
-### Configuration file
+### Configuration files
 
-You need to provide a mac address you want to fake and network interface to affect.
+You can make your own set of tea & pot configuration files. This project comes with generic configuration files, courtesy of [Mei Leaf](https://meileaf.com).
 
-```ini
-TODO: config sample
+**Tea example:**
+
+```bash
+TEA_NAME="Generic Green Tea"
+TEA_INITIAL_INFUSION_DURATION=15
+TEA_NEXT_INFUSION_DURATION=3
+TEA_NUMBER_OF_INFUSIONS=5
+TEA_BREWING_TEMP=80
+TEA_AMOUNT_PER_100G=3.5
+```
+
+**Pot example:**
+
+```bash
+POT_NAME="Generic 200 ml"
+POT_DECANT_DURATION=5
+POT_CAPACITY_WITH_LEAVES=180
 ```
 
 ## Keywords
