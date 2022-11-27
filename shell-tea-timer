@@ -16,7 +16,7 @@ readonly _STT_RESET_OPTION="r"
 readonly _STT_HELP_OPTION="h"
 readonly _STT_SETUP_ARGUMENT="setup"
 
-readonly STT_CONFIG_FILEPATH_ROOT="/tmp/shell-tea-timer"
+readonly STT_TMP_FILEPATH_ROOT="/tmp/shell-tea-timer"
 readonly UNDEF_VALUE="undef"
 
 readonly CONF_DIRPATH="${ABSOLUTE_DIRPATH}/conf"
@@ -249,7 +249,7 @@ function stt::utils::read_param_grace() {
     local tea="${1}"
     local param_name="${2}"
 
-    local filepath="${STT_CONFIG_FILEPATH_ROOT}.${tea}.${param_name}.cfg"
+    local filepath="${STT_TMP_FILEPATH_ROOT}.${tea}.${param_name}.cfg"
 
     if [[ ! -r "${filepath}" ]]; then
         return 1
@@ -263,7 +263,7 @@ function stt::utils::write_param() {
     local param_name="${2}"
     local param_value="${3}"
 
-    local filepath="${STT_CONFIG_FILEPATH_ROOT}.${tea}.${param_name}.cfg"
+    local filepath="${STT_TMP_FILEPATH_ROOT}.${tea}.${param_name}.cfg"
 
     printf '%s' "${param_value}" > "${filepath}" 2> /dev/null
 }
