@@ -1,0 +1,90 @@
+#! /usr/bin/env bash
+
+function stt::utils::is_installed() {
+    command which "${1}" &> /dev/null && return 0
+
+    return 1
+}
+
+function stt::utils::terminate() {
+    local exit_code="1"
+    local message=""
+
+    if [[ ${#} -eq 1 ]]; then
+        message="${1}"
+    elif [[ ${#} -eq 2 ]]; then
+        exit_code="${1}"
+        message="${2}"
+    fi
+
+    if [[ ${#} -ne 0 ]]; then
+        >&2 echo
+        >&2 ansi --bold --red "The program has been terminated due to a critical error:"
+        >&2 echo
+        >&2 echo "${message}"
+    fi
+
+    exit "${exit_code}"
+}
+
+function stt::utils::check_if_set() {
+    local param_name="${1}"
+    local input="${2}"
+
+    if [[ "${input}" == "${UNDEF_VALUE}" ]]; then
+        stt::utils::terminate "Undefined value for param [${param_name}]."
+    fi
+}
+
+function stt:utils::repeat_char() {
+    local end="${1}"
+    local str="${2}"
+
+    local start=1
+    local range
+
+    range="$(seq "${start}" "${end}")"
+
+    if [[ "$(echo "if (${end} < ${start}) 0 else 1" | bc)" == "0" ]]; then
+        return
+    fi
+
+    for start in ${range}; do
+        printf '%s' "${str}"
+    done
+}
+
+function stt::utils::get_elapsed_time() {
+    local old_time="${1}"
+    local new_time="${2}"
+
+    gdate -d "${new_time} $(gdate -d "${old_time}" +%s.%N) seconds ago" +%s.%3N
+}
+
+function stt:utils::get_current_datetime() {
+    gdate +'%Y-%m-%d %H:%M:%S.%N'
+}
+
+function stt::utils::get_finished_percentage() {
+    local finished_amount="${1}"
+    local total="${2}"
+
+    finished_percents="$(echo "((${finished_amount}) * 100 / ${total}) / 1" | bc)"
+
+    if [[ "${finished_percents}" -gt 100 ]]; then
+        printf '%s' "100"
+        return
+    fi
+
+    printf '%s' "${finished_percents}"
+}
+
+function stt::utils::check_prerequisites() {
+    if ! stt::utils::is_installed "fzf"; then
+        stt::utils::terminate "fzf is not installed"
+    fi
+
+    if ! stt::utils::is_installed "gdate"; then
+        stt::utils::terminate "gdate is not installed"
+    fi
+}

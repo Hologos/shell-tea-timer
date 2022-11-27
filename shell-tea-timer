@@ -1,0 +1,155 @@
+#! /usr/bin/env bash
+
+set -euo pipefail
+
+# -- global variables ---------------------------------------------------------
+
+readonly STT_OS_LINUX="linux"
+readonly STT_OS_MACOS="macos"
+
+# -- os detection -------------------------------------------------------------
+
+STT_OS="$(uname)"
+
+case "${STT_OS}" in
+    Linux)
+        STT_OS="${STT_OS_LINUX}"
+    ;;
+
+    Darwin)
+        STT_OS="${STT_OS_MACOS}"
+    ;;
+
+    *)
+        >&2 echo
+        >&2 echo "[${STT_OS}] is not supported operating system."
+        exit 1
+esac
+
+# -- absolute dirpath ---------------------------------------------------------
+
+ABSOLUTE_DIRPATH="$( cd "$( dirname "$( [[ -L "${BASH_SOURCE[0]}" ]] && readlink "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}" )" )" && pwd )" || { \
+    >&2 echo
+    >&2 echo "Cannot determine real path of the script."
+    exit 1
+}
+
+# -- global variables ---------------------------------------------------------
+
+readonly UNDEF_VALUE="undef"
+
+readonly LIBS_DIRPATH="${ABSOLUTE_DIRPATH}/libs"
+readonly VENDOR_DIRPATH="${ABSOLUTE_DIRPATH}/vendor"
+readonly CONF_DIRPATH="${ABSOLUTE_DIRPATH}/conf"
+readonly TEAS_CONF_DIRPATH="${CONF_DIRPATH}/teas"
+readonly POTS_CONF_DIRPATH="${CONF_DIRPATH}/pots"
+
+readonly SLOWNESS_COMPENSATION_FACTOR=1
+
+readonly MINIMUM_DECANT_TIME=3
+readonly DECANT_RATIO=0.6
+
+TEA="${UNDEF_VALUE}"
+POT="${UNDEF_VALUE}"
+TEA_NAME="${UNDEF_VALUE}"
+TEA_INITIAL_INFUSION_DURATION="${UNDEF_VALUE}"
+TEA_NEXT_INFUSION_DURATION="${UNDEF_VALUE}"
+TEA_NUMBER_OF_INFUSIONS="${UNDEF_VALUE}"
+TEA_BREWING_TEMP="${UNDEF_VALUE}"
+TEA_AMOUNT_PER_100G="${UNDEF_VALUE}"
+POT_NAME="${UNDEF_VALUE}"
+POT_DECANT_DURATION="${UNDEF_VALUE}"
+POT_CAPACITY_WITH_LEAVES="${UNDEF_VALUE}"
+
+# -- load libraries -----------------------------------------------------------
+
+# shellcheck source=vendor/fidian/ansi/ansi
+. "${VENDOR_DIRPATH}/fidian/ansi/ansi"
+
+# shellcheck source=libs/utils
+. "${LIBS_DIRPATH}/utils"
+
+# shellcheck source=libs/io
+. "${LIBS_DIRPATH}/io"
+
+# shellcheck source=libs/gfx
+. "${LIBS_DIRPATH}/gfx"
+
+# shellcheck source=libs/inputparser
+. "${LIBS_DIRPATH}/inputparser"
+
+# shellcheck source=libs/setup
+. "${LIBS_DIRPATH}/setup"
+
+# shellcheck source=libs/helpers
+. "${LIBS_DIRPATH}/helpers"
+
+# shellcheck source=libs/format
+. "${LIBS_DIRPATH}/format"
+
+# shellcheck source=libs/debug
+. "${LIBS_DIRPATH}/debug"
+
+# -- function definition ------------------------------------------------------
+
+function stt::reset_infusion_counter() {
+    local tea="${1}"
+
+    stt::io::write_param "${tea}" "${IO_PARAM_TEA_INFUSION_COUNTER}" "0"
+
+    echo
+    echo "Reseting $(ansi --bold "${TEA_NAME}") infusion counter."
+}
+
+function stt::water_temp() {
+    echo "${TEA_BREWING_TEMP}$(printf '%s' $'\xc2\xb0')C"
+}
+
+function stt::calculate_amount() {
+    echo "$(echo "scale=1;${POT_CAPACITY_WITH_LEAVES}/100*${TEA_AMOUNT_PER_100G}" | bc) g"
+}
+
+function stt::calculate_start_of_decanting_raw() {
+    echo "scale=0;(${POT_DECANT_DURATION}*${DECANT_RATIO})/1" | bc
+}
+
+function stt::calculate_start_of_decanting() {
+    local start_of_decanting
+    start_of_decanting="$(stt::calculate_start_of_decanting_raw)"
+
+    printf '%s' "$(stt::format::format_seconds "${start_of_decanting}")"
+}
+
+function stt::get_start_command() {
+    printf '%s %s' "$(basename "${0}")" "${TEA}"
+}
+
+# -- initial setup ------------------------------------------------------------
+
+stt::utils::check_prerequisites
+
+stt::inputparser::parse_input "${@}"
+
+TEA_INFUSION_COUNTER="$(( TEA_INFUSION_COUNTER + 1 ))"
+stt::io::write_param "${TEA}" "${IO_PARAM_TEA_INFUSION_COUNTER}" "${TEA_INFUSION_COUNTER}"
+
+if [[ "${TEA_INFUSION_COUNTER}" -eq "${TEA_NUMBER_OF_INFUSIONS}" ]]; then
+    say "Poslední nálev!" &
+elif [[ "${TEA_INFUSION_COUNTER}" -gt "${TEA_NUMBER_OF_INFUSIONS}" ]]; then
+    say "Už jsi přes čáru." &
+fi
+
+# -- main program -------------------------------------------------------------
+
+tea_countdown="$(( TEA_INITIAL_INFUSION_DURATION + (TEA_INFUSION_COUNTER - 1) * TEA_NEXT_INFUSION_DURATION ))"
+
+echo
+echo "You are brewing $(ansi --bold "${TEA_NAME}") in $(ansi --bold "${POT_NAME}") pot."
+echo "This is your $(ansi --bold "$(stt::format::format_infusion_number_ordinal)") infusion out of $(ansi --bold "${TEA_NUMBER_OF_INFUSIONS}")."
+echo "Infuse for $(ansi --bold "${tea_countdown} seconds") in $(ansi --bold "$(stt::water_temp)") water."
+echo "Decanting should start $(ansi --bold "$(stt::calculate_start_of_decanting)") earlier."
+stt::gfx::countdown_start "${tea_countdown}"
+echo "Decant your tea now!"
+say "Do píči čaj."
+
+stt::debug::report_compensasion_factor

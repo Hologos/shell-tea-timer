@@ -1,0 +1,86 @@
+#! /usr/bin/env bash
+
+readonly _OPTION_RESET="r"
+readonly _OPTION_HELP="h"
+
+readonly _ARGUMENT_SETUP="setup"
+
+function stt::inputparse::usage() {
+    # shellcheck disable=SC2155
+    local fmt_bold="$(ansi --bold --no-restore)"
+    # shellcheck disable=SC2155
+    local fmt_underline="$(ansi --underline --no-restore)"
+    # shellcheck disable=SC2155
+    local fmt_reset="$(ansi --reset-attrib)"
+    local tea
+
+    >&2 echo
+    >&2 echo "Usage: ${0} [-${_OPTION_HELP}] [-${_OPTION_RESET}] [<${_ARGUMENT_SETUP}> | <tea>]"
+    >&2 echo
+    >&2 echo "    ${fmt_bold}-${_OPTION_HELP}${fmt_reset}"
+    >&2 echo "        Prints this help."
+    >&2 echo
+    >&2 echo "    ${fmt_bold}-${_OPTION_RESET}${fmt_reset}"
+    >&2 echo "        Resets infusion counters."
+    >&2 echo
+    >&2 echo "    ${fmt_bold}<${_ARGUMENT_SETUP}>${fmt_reset}"
+    >&2 echo "        Perform setup of tea and pot."
+    >&2 echo
+    >&2 echo "    ${fmt_bold}<tea>${fmt_reset}"
+    >&2 echo "        Tea you want to brew."
+    >&2 echo
+    >&2 echo "        Possible values:"
+    stt::utils::discover_teas | \
+        while IFS=$'\n' read -r tea; do
+            >&2 echo "            ${tea}"
+        done
+}
+
+function stt::inputparser::parse_input() {
+    local reset=0
+    local selected_tea=0
+
+    while [[ ${#} -ne 0 ]] && [[ "${1}" != "" ]]; do
+        local input="${1}"
+
+        case "${input}" in
+
+            "-${_OPTION_RESET}" )
+                reset=1
+            ;;
+
+            "-${_OPTION_HELP}" )
+                stt::inputparse::usage
+                stt::utils::terminate
+            ;;
+
+            "${_ARGUMENT_SETUP}" )
+                stt::setup::setup
+                exit 0
+            ;;
+
+            * )
+                if stt::setup::setup_params_if_valid_tea "${input}"; then
+                    selected_tea=1
+                else
+                    stt::inputparse::usage
+                    stt::utils::terminate "Unknown option [${input}]."
+                fi
+        esac
+
+        shift
+    done
+
+    if [[ ${selected_tea} -ne 1 ]]; then
+        stt::inputparse::usage
+        stt::utils::terminate "You have to select a tea."
+    fi
+
+    stt::utils::check_if_set "tea type" "${TEA}"
+
+    if [[ "${reset}" -eq 1 ]]; then
+        stt::reset_infusion_counter "${TEA}"
+        echo
+        exit 0
+    fi
+}
