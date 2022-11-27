@@ -320,7 +320,7 @@ function stt::io::discover_pot_conf_files() {
     stt::io::discover_files "${POTS_CONF_DIRPATH}" "conf"
 }
 
-function stt::utils::usage() {
+function stt::inputparse::usage() {
     # shellcheck disable=SC2155
     local fmt_bold="$(ansi --bold --no-restore)"
     # shellcheck disable=SC2155
@@ -566,7 +566,7 @@ function stt::inputparser::parse_input() {
             ;;
 
             "-${_STT_HELP_OPTION}" )
-                stt::utils::usage
+                stt::inputparse::usage
                 stt::utils::terminate
             ;;
 
@@ -579,7 +579,7 @@ function stt::inputparser::parse_input() {
                 if stt::setup_params_if_valid_tea "${input}"; then
                     selected_tea=1
                 else
-                    stt::utils::usage
+                    stt::inputparse::usage
                     stt::utils::terminate "Unknown option [${input}]."
                 fi
         esac
@@ -588,7 +588,7 @@ function stt::inputparser::parse_input() {
     done
 
     if [[ ${selected_tea} -ne 1 ]]; then
-        stt::utils::usage
+        stt::inputparse::usage
         stt::utils::terminate "You have to select a tea."
     fi
 
