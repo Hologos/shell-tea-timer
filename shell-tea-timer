@@ -41,9 +41,10 @@ readonly _STT_RESET_OPTION="r"
 readonly _STT_HELP_OPTION="h"
 readonly _STT_SETUP_ARGUMENT="setup"
 
-readonly STT_TMP_FILEPATH_ROOT="/tmp/shell-tea-timer"
 readonly UNDEF_VALUE="undef"
 
+readonly LIBS_DIRPATH="${ABSOLUTE_DIRPATH}/libs"
+readonly VENDOR_DIRPATH="${ABSOLUTE_DIRPATH}/vendor"
 readonly CONF_DIRPATH="${ABSOLUTE_DIRPATH}/conf"
 readonly TEAS_CONF_DIRPATH="${CONF_DIRPATH}/teas"
 readonly POTS_CONF_DIRPATH="${CONF_DIRPATH}/pots"
@@ -52,13 +53,6 @@ readonly SLOWNESS_COMPENSATION_FACTOR=1
 
 readonly MINIMUM_DECANT_TIME=3
 readonly DECANT_RATIO=0.6
-
-readonly IO_PARAM_POT="pot"
-readonly IO_PARAM_TEA_INFUSION_COUNTER="tea_infusion_counter"
-
-_DEBUG_COMPENSATION_FACTOR_CHECK_START=0
-_DEBUG_COMPENSATION_FACTOR_CHECK_FINISH=0
-_DEBUG_COMPENSATION_FACTOR_CHECK_DESIRED_DURATION=0
 
 TEA="${UNDEF_VALUE}"
 POT="${UNDEF_VALUE}"
@@ -70,286 +64,30 @@ TEA_BREWING_TEMP="${UNDEF_VALUE}"
 TEA_AMOUNT_PER_100G="${UNDEF_VALUE}"
 POT_CAPACITY_WITH_LEAVES="${UNDEF_VALUE}"
 
+# -- load libraries -----------------------------------------------------------
+
+# shellcheck source=vendor/fidian/ansi/ansi
+. "${VENDOR_DIRPATH}/fidian/ansi/ansi"
+
+# shellcheck source=libs/utils
+. "${LIBS_DIRPATH}/utils"
+
+# shellcheck source=libs/io
+. "${LIBS_DIRPATH}/io"
+
+# shellcheck source=libs/gfx
+. "${LIBS_DIRPATH}/gfx"
+
+# shellcheck source=libs/inputparser
+. "${LIBS_DIRPATH}/inputparser"
+
+# shellcheck source=libs/helpers
+. "${LIBS_DIRPATH}/helpers"
+
+# shellcheck source=libs/debug
+. "${LIBS_DIRPATH}/debug"
+
 # -- function definition ------------------------------------------------------
-
-function stt::debug::report_compensasion_factor() {
-    local real_world_duration duration_diff slowness_compensation_factor
-
-    echo
-    echo "=================="
-    echo "=     DEBUG      ="
-    echo "=================="
-    echo
-
-    real_world_duration="$(( _DEBUG_COMPENSATION_FACTOR_CHECK_FINISH - _DEBUG_COMPENSATION_FACTOR_CHECK_START ))"
-    duration_diff="$(( real_world_duration - _DEBUG_COMPENSATION_FACTOR_CHECK_DESIRED_DURATION ))"
-    slowness_compensation_factor="$(echo "scale=2;(${real_world_duration}*${SLOWNESS_COMPENSATION_FACTOR})/${_DEBUG_COMPENSATION_FACTOR_CHECK_DESIRED_DURATION}" | bc)"
-
-    echo "Desired duration is [${_DEBUG_COMPENSATION_FACTOR_CHECK_DESIRED_DURATION} sec]."
-    echo "Real world duration is [${real_world_duration} sec]."
-    echo
-    echo "Duration difference is [${duration_diff} sec]."
-    echo "Slowness compensation factor should be [${slowness_compensation_factor}] (set value is [${SLOWNESS_COMPENSATION_FACTOR}])."
-}
-
-function stt::utils::is_installed() {
-    command which "${1}" &> /dev/null && return 0
-
-    return 1
-}
-
-function stt::utils::terminate() {
-    local exit_code="1"
-    local message=""
-
-    if [[ ${#} -eq 1 ]]; then
-        message="${1}"
-    elif [[ ${#} -eq 2 ]]; then
-        exit_code="${1}"
-        message="${2}"
-    fi
-
-    if [[ ${#} -ne 0 ]]; then
-        >&2 echo
-        >&2 ansi --bold --red "The program has been terminated due to a critical error:"
-        >&2 echo
-        >&2 echo "${message}"
-    fi
-
-    exit "${exit_code}"
-}
-
-function stt::utils::check_if_set() {
-    local param_name="${1}"
-    local input="${2}"
-
-    if [[ "${input}" == "${UNDEF_VALUE}" ]]; then
-        stt::utils::terminate "Undefined value for param [${param_name}]."
-    fi
-}
-
-function stt:utils::repeat_char() {
-    local end="${1}"
-    local str="${2}"
-
-    local start=1
-    local range
-
-    range="$(seq "${start}" "${end}")"
-
-    if [[ "$(echo "if (${end} < ${start}) 0 else 1" | bc)" == "0" ]]; then
-        return
-    fi
-
-    for start in ${range}; do
-        printf '%s' "${str}"
-    done
-}
-
-function stt::utils::report_seconds() {
-    local seconds="${1}"
-    local placeholder="second"
-
-    if [[ "${seconds}" -ne 1 ]]; then
-        placeholder+="s"
-    fi
-
-    printf '%s %s' "${seconds}" "${placeholder}"
-}
-
-function stt::utils::get_elapsed_time() {
-    local old_time="${1}"
-    local new_time="${2}"
-
-    gdate -d "${new_time} $(gdate -d "${old_time}" +%s.%N) seconds ago" +%s.%3N
-}
-
-function stt:utils::get_current_datetime() {
-    gdate +'%Y-%m-%d %H:%M:%S.%N'
-}
-
-function stt::utils::get_finished_percentage() {
-    local finished_amount="${1}"
-    local total="${2}"
-
-    finished_percents="$(echo "((${finished_amount}) * 100 / ${total}) / 1" | bc)"
-
-    if [[ "${finished_percents}" -gt 100 ]]; then
-        printf '%s' "100"
-        return
-    fi
-
-    printf '%s' "${finished_percents}"
-}
-
-function stt::gfx::countdown_start() {
-    local duration="${1}"
-
-    local bar_length=10
-    local cycles_per_second=10
-
-    local sleep_length
-    local decant_start
-    local datetime_start
-    local datetime_current
-    local sec_milisec_diff
-    local seconds_left
-    local finished_percents
-    local chars_pre
-    local chars_post
-
-    _DEBUG_COMPENSATION_FACTOR_CHECK_DESIRED_DURATION="${duration}"
-    _DEBUG_COMPENSATION_FACTOR_CHECK_START="${SECONDS}"
-
-    sleep_length="$(echo "scale=2;1/${cycles_per_second}" | bc)"
-    decant_start="$(stt::calculate_start_of_decanting_raw)"
-    datetime_start="$(stt:utils::get_current_datetime)"
-
-    echo
-
-    while true; do
-        datetime_current="$(stt:utils::get_current_datetime)"
-        sec_milisec_diff="$(stt::utils::get_elapsed_time "${datetime_start}" "${datetime_current}")"
-        seconds_left="$(echo "scale=0;(${duration} - ${sec_milisec_diff} + 1)/1" | bc)" # +1 due to how rounding -0.xx works
-        finished_percents="$(stt::utils::get_finished_percentage "${sec_milisec_diff}" "${duration}")"
-
-        chars_pre="$(echo "scale=0;(${finished_percents}/${bar_length})/1" | bc)"
-        chars_post="$(echo "scale=0;${bar_length} - ${chars_pre}" | bc)"
-
-        # echo "duration=[${duration}]"
-        # echo "sleep_length=[${sleep_length}]"
-        # echo "decant_start=[${decant_start}]"
-        # echo "datetime_start=[${datetime_start}]"
-        # echo "datetime_current=[${datetime_current}]"
-        # echo "sec_milisec_diff=[${sec_milisec_diff}]"
-        # echo "seconds_left=[${seconds_left}]"
-        # echo
-        # echo "finished_percents=[${finished_percents}]"
-        # echo "bar_length=[${bar_length}]"
-        # echo "chars_pre=[${chars_pre}]"
-        # echo "chars_post=[${chars_post}]"
-        # echo
-        # echo "-----------------------------------------"
-        # echo
-
-        if [[ "${seconds_left}" -eq "${decant_start}" ]] && \
-           [[ "${decant_start}" -ge "${MINIMUM_DECANT_TIME}" ]] && \
-           [[ "${decant_start_reported}" -eq 0 ]]; then
-            decant_start_reported=1
-            say "Začni slévat!" &
-        fi
-
-        ansi --no-newline --erase-line=1
-        ansi --no-newline --column=1
-        echo -n
-
-        printf '%s' '<'
-        stt:utils::repeat_char "${chars_pre}" "="
-        stt:utils::repeat_char "${chars_post}" " "
-        printf '%s' '>  '
-        printf '%s%% finished (%s)' "${finished_percents}" "$(stt::utils::report_seconds "${seconds_left}")"
-
-        if [[ "${seconds_left}" -le 0 ]]; then
-            echo
-            break
-        else
-            sleep "${sleep_length}"
-        fi
-    done
-
-    _DEBUG_COMPENSATION_FACTOR_CHECK_FINISH="${SECONDS}"
-
-    echo
-}
-
-function stt::io::read_param() {
-    local tea="${1}"
-    local param_name="${2}"
-
-    stt::io::read_param_grace "${tea}" "${param_name}" \
-        || stt::utils::terminate "Parameter [${param_name}] does not exist for tea [${tea}]."
-}
-
-function stt::io::read_param_grace() {
-    local tea="${1}"
-    local param_name="${2}"
-
-    local filepath="${STT_TMP_FILEPATH_ROOT}.${tea}.${param_name}.cfg"
-
-    if [[ ! -r "${filepath}" ]]; then
-        return 1
-    fi
-
-    cat "${filepath}"
-}
-
-function stt::io::write_param() {
-    local tea="${1}"
-    local param_name="${2}"
-    local param_value="${3}"
-
-    local filepath="${STT_TMP_FILEPATH_ROOT}.${tea}.${param_name}.cfg"
-
-    printf '%s' "${param_value}" > "${filepath}" 2> /dev/null
-}
-
-function stt::io::discover_files() {
-    local dirpath="${1}"
-    local file_ext="${2}"
-
-    if [[ ! -e "${dirpath}" ]]; then
-        stt::utils::terminate "Directory [${dirpath}] does not exist."
-    fi
-
-    if [[ ! -d "${dirpath}" ]]; then
-        stt::utils::terminate "[${dirpath}] is not a directory."
-    fi
-
-    find "${dirpath}" -type f -name "*.${file_ext}" -exec basename {} \;
-}
-
-function stt::io::discover_tea_conf_files() {
-    stt::io::discover_files "${TEAS_CONF_DIRPATH}" "conf"
-}
-
-function stt::utils::discover_teas() {
-    stt::io::discover_tea_conf_files | rev | cut -c 6- | rev | sort
-}
-
-function stt::io::discover_pot_conf_files() {
-    stt::io::discover_files "${POTS_CONF_DIRPATH}" "conf"
-}
-
-function stt::inputparse::usage() {
-    # shellcheck disable=SC2155
-    local fmt_bold="$(ansi --bold --no-restore)"
-    # shellcheck disable=SC2155
-    local fmt_underline="$(ansi --underline --no-restore)"
-    # shellcheck disable=SC2155
-    local fmt_reset="$(ansi --reset-attrib)"
-    local tea
-
-    >&2 echo
-    >&2 echo "Usage: ${0} [-${_STT_HELP_OPTION}] [-${_STT_RESET_OPTION}] [<${_STT_SETUP_ARGUMENT}> | <tea>]"
-    >&2 echo
-    >&2 echo "    ${fmt_bold}-${_STT_HELP_OPTION}${fmt_reset}"
-    >&2 echo "        Prints this help."
-    >&2 echo
-    >&2 echo "    ${fmt_bold}-${_STT_RESET_OPTION}${fmt_reset}"
-    >&2 echo "        Resets infusion counters."
-    >&2 echo
-    >&2 echo "    ${fmt_bold}<${_STT_SETUP_ARGUMENT}>${fmt_reset}"
-    >&2 echo "        Perform setup of tea and pot."
-    >&2 echo
-    >&2 echo "    ${fmt_bold}<tea>${fmt_reset}"
-    >&2 echo "        Tea you want to brew."
-    >&2 echo
-    >&2 echo "        Possible values:"
-    stt::utils::discover_teas | \
-        while IFS=$'\n' read -r tea; do
-            >&2 echo "            ${tea}"
-        done
-}
 
 function stt::reset_infusion_counter() {
     local tea="${1}"
@@ -542,64 +280,6 @@ function stt::setup() {
     printf "%s" "${command}" | pbcopy
 }
 
-function stt::utils::check_prerequisites() {
-    if ! stt::utils::is_installed "fzf"; then
-        stt::utils::terminate "fzf is not installed"
-    fi
-
-    if ! stt::utils::is_installed "gdate"; then
-        stt::utils::terminate "gdate is not installed"
-    fi
-}
-
-function stt::inputparser::parse_input() {
-    local reset=0
-    local selected_tea=0
-
-    while [[ ${#} -ne 0 ]] && [[ "${1}" != "" ]]; do
-        local input="${1}"
-
-        case "${input}" in
-
-            "-${_STT_RESET_OPTION}" )
-                reset=1
-            ;;
-
-            "-${_STT_HELP_OPTION}" )
-                stt::inputparse::usage
-                stt::utils::terminate
-            ;;
-
-            "${_STT_SETUP_ARGUMENT}" )
-                stt::setup
-                exit 0
-            ;;
-
-            * )
-                if stt::setup_params_if_valid_tea "${input}"; then
-                    selected_tea=1
-                else
-                    stt::inputparse::usage
-                    stt::utils::terminate "Unknown option [${input}]."
-                fi
-        esac
-
-        shift
-    done
-
-    if [[ ${selected_tea} -ne 1 ]]; then
-        stt::inputparse::usage
-        stt::utils::terminate "You have to select a tea."
-    fi
-
-    stt::utils::check_if_set "tea type" "${TEA}"
-
-    if [[ "${reset}" -eq 1 ]]; then
-        stt::reset_infusion_counter "${TEA}"
-        echo
-        exit 0
-    fi
-}
 
 # -- initial setup ------------------------------------------------------------
 

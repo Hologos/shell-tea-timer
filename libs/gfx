@@ -1,0 +1,81 @@
+#! /usr/bin/env bash
+
+function stt::gfx::countdown_start() {
+    local duration="${1}"
+
+    local bar_length=10
+    local cycles_per_second=10
+
+    local sleep_length
+    local decant_start
+    local datetime_start
+    local datetime_current
+    local sec_milisec_diff
+    local seconds_left
+    local finished_percents
+    local chars_pre
+    local chars_post
+
+    _DEBUG_COMPENSATION_FACTOR_CHECK_DESIRED_DURATION="${duration}"
+    _DEBUG_COMPENSATION_FACTOR_CHECK_START="${SECONDS}"
+
+    sleep_length="$(echo "scale=2;1/${cycles_per_second}" | bc)"
+    decant_start="$(stt::calculate_start_of_decanting_raw)"
+    datetime_start="$(stt:utils::get_current_datetime)"
+
+    echo
+
+    while true; do
+        datetime_current="$(stt:utils::get_current_datetime)"
+        sec_milisec_diff="$(stt::utils::get_elapsed_time "${datetime_start}" "${datetime_current}")"
+        seconds_left="$(echo "scale=0;(${duration} - ${sec_milisec_diff} + 1)/1" | bc)" # +1 due to how rounding -0.xx works
+        finished_percents="$(stt::utils::get_finished_percentage "${sec_milisec_diff}" "${duration}")"
+
+        chars_pre="$(echo "scale=0;(${finished_percents}/${bar_length})/1" | bc)"
+        chars_post="$(echo "scale=0;${bar_length} - ${chars_pre}" | bc)"
+
+        # echo "duration=[${duration}]"
+        # echo "sleep_length=[${sleep_length}]"
+        # echo "decant_start=[${decant_start}]"
+        # echo "datetime_start=[${datetime_start}]"
+        # echo "datetime_current=[${datetime_current}]"
+        # echo "sec_milisec_diff=[${sec_milisec_diff}]"
+        # echo "seconds_left=[${seconds_left}]"
+        # echo
+        # echo "finished_percents=[${finished_percents}]"
+        # echo "bar_length=[${bar_length}]"
+        # echo "chars_pre=[${chars_pre}]"
+        # echo "chars_post=[${chars_post}]"
+        # echo
+        # echo "-----------------------------------------"
+        # echo
+
+        if [[ "${seconds_left}" -eq "${decant_start}" ]] && \
+           [[ "${decant_start}" -ge "${MINIMUM_DECANT_TIME}" ]] && \
+           [[ "${decant_start_reported}" -eq 0 ]]; then
+            decant_start_reported=1
+            say "Začni slévat!" &
+        fi
+
+        ansi --no-newline --erase-line=1
+        ansi --no-newline --column=1
+        echo -n
+
+        printf '%s' '<'
+        stt:utils::repeat_char "${chars_pre}" "="
+        stt:utils::repeat_char "${chars_post}" " "
+        printf '%s' '>  '
+        printf '%s%% finished (%s)' "${finished_percents}" "$(stt::utils::report_seconds "${seconds_left}")"
+
+        if [[ "${seconds_left}" -le 0 ]]; then
+            echo
+            break
+        else
+            sleep "${sleep_length}"
+        fi
+    done
+
+    _DEBUG_COMPENSATION_FACTOR_CHECK_FINISH="${SECONDS}"
+
+    echo
+}

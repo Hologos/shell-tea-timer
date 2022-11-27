@@ -1,0 +1,25 @@
+#! /usr/bin/env bash
+
+_DEBUG_COMPENSATION_FACTOR_CHECK_START=0
+_DEBUG_COMPENSATION_FACTOR_CHECK_FINISH=0
+_DEBUG_COMPENSATION_FACTOR_CHECK_DESIRED_DURATION=0
+
+function stt::debug::report_compensasion_factor() {
+    local real_world_duration duration_diff slowness_compensation_factor
+
+    echo
+    echo "=================="
+    echo "=     DEBUG      ="
+    echo "=================="
+    echo
+
+    real_world_duration="$(( _DEBUG_COMPENSATION_FACTOR_CHECK_FINISH - _DEBUG_COMPENSATION_FACTOR_CHECK_START ))"
+    duration_diff="$(( real_world_duration - _DEBUG_COMPENSATION_FACTOR_CHECK_DESIRED_DURATION ))"
+    slowness_compensation_factor="$(echo "scale=2;(${real_world_duration}*${SLOWNESS_COMPENSATION_FACTOR})/${_DEBUG_COMPENSATION_FACTOR_CHECK_DESIRED_DURATION}" | bc)"
+
+    echo "Desired duration is [${_DEBUG_COMPENSATION_FACTOR_CHECK_DESIRED_DURATION} sec]."
+    echo "Real world duration is [${real_world_duration} sec]."
+    echo
+    echo "Duration difference is [${duration_diff} sec]."
+    echo "Slowness compensation factor should be [${slowness_compensation_factor}] (set value is [${SLOWNESS_COMPENSATION_FACTOR}])."
+}
