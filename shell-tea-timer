@@ -7,11 +7,10 @@ set -euo pipefail
 readonly STT_OS_LINUX="linux"
 readonly STT_OS_MACOS="macos"
 
-STT_OS="$(uname)"
-
 # -- os detection -------------------------------------------------------------
 
-# checks if this is supported OS
+STT_OS="$(uname)"
+
 case "${STT_OS}" in
     Linux)
         STT_OS="${STT_OS_LINUX}"
