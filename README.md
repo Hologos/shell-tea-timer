@@ -20,7 +20,11 @@ TODO: script output
 
 If on macOS, make sure you have all those things installed:
 
-- `brew/coreutils`: gnu utils prefixed with `g`
+- `brew/coreutils`: gnu utils prefixed with `g` (eg. `gdate`)
+
+Make sure you have all those things installed:
+
+- `fzf`: to make this script interactable
 
 ### Cloning repo
 
