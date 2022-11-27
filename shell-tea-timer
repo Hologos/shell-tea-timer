@@ -56,12 +56,14 @@ readonly DECANT_RATIO=0.6
 
 TEA="${UNDEF_VALUE}"
 POT="${UNDEF_VALUE}"
+TEA_NAME="${UNDEF_VALUE}"
 TEA_INITIAL_INFUSION_DURATION="${UNDEF_VALUE}"
 TEA_NEXT_INFUSION_DURATION="${UNDEF_VALUE}"
 TEA_NUMBER_OF_INFUSIONS="${UNDEF_VALUE}"
-POT_DECANT_DURATION="${UNDEF_VALUE}"
 TEA_BREWING_TEMP="${UNDEF_VALUE}"
 TEA_AMOUNT_PER_100G="${UNDEF_VALUE}"
+POT_NAME="${UNDEF_VALUE}"
+POT_DECANT_DURATION="${UNDEF_VALUE}"
 POT_CAPACITY_WITH_LEAVES="${UNDEF_VALUE}"
 
 # -- load libraries -----------------------------------------------------------
@@ -148,6 +150,7 @@ function stt::setup_pot_params() {
     # shellcheck source=conf/pots/glass.conf
     source "${POTS_CONF_DIRPATH}/${pot_config_filepath}"
 
+    stt::utils::check_if_set "pot name" "${POT_NAME}"
     stt::utils::check_if_set "pot decant duration" "${POT_DECANT_DURATION}"
     stt::utils::check_if_set "pot capacity with leaves" "${POT_CAPACITY_WITH_LEAVES}"
 }
