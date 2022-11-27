@@ -78,6 +78,9 @@ POT_CAPACITY_WITH_LEAVES="${UNDEF_VALUE}"
 # shellcheck source=libs/inputparser
 . "${LIBS_DIRPATH}/inputparser"
 
+# shellcheck source=libs/setup
+. "${LIBS_DIRPATH}/setup"
+
 # shellcheck source=libs/helpers
 . "${LIBS_DIRPATH}/helpers"
 
