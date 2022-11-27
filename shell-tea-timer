@@ -182,7 +182,7 @@ function stt::utils::get_finished_percentage() {
     printf '%s' "${finished_percents}"
 }
 
-function stt:utils::wait_with_bar_counter() {
+function stt::gfx::countdown_start() {
     local duration="${1}"
 
     local bar_length=10
@@ -625,7 +625,7 @@ echo "You are brewing $(ansi --bold "${TEA_NAME}") in $(ansi --bold "${POT_NAME}
 echo "This is your $(ansi --bold "$(stt::infusion_number_ordinal)") infusion out of $(ansi --bold "${TEA_NUMBER_OF_INFUSIONS}")."
 echo "Infuse for $(ansi --bold "${tea_countdown} seconds") in $(ansi --bold "$(stt::water_temp)") water."
 echo "Decanting should start $(ansi --bold "$(stt::calculate_start_of_decanting)") earlier."
-stt:utils::wait_with_bar_counter "${tea_countdown}"
+stt::gfx::countdown_start "${tea_countdown}"
 echo "Decant your tea now!"
 say "Do píči čaj."
 
