@@ -53,8 +53,8 @@ readonly SLOWNESS_COMPENSATION_FACTOR=1
 readonly MINIMUM_DECANT_TIME=3
 readonly DECANT_RATIO=0.6
 
-readonly PARAM_POT="pot"
-readonly PARAM_TEA_INFUSION_COUNTER="tea_infusion_counter"
+readonly IO_PARAM_POT="pot"
+readonly IO_PARAM_TEA_INFUSION_COUNTER="tea_infusion_counter"
 
 _DEBUG_COMPENSATION_FACTOR_CHECK_START=0
 _DEBUG_COMPENSATION_FACTOR_CHECK_FINISH=0
@@ -354,7 +354,7 @@ function stt::utils::usage() {
 function stt::reset_infusion_counter() {
     local tea="${1}"
 
-    stt::io::write_param "${tea}" "${PARAM_TEA_INFUSION_COUNTER}" "0"
+    stt::io::write_param "${tea}" "${IO_PARAM_TEA_INFUSION_COUNTER}" "0"
 
     echo
     echo "Reseting $(ansi --bold "${TEA_NAME}") infusion counter."
@@ -422,7 +422,7 @@ function stt::setup_pot_params() {
     local tea="${1}"
     local pot_config_filepath
 
-    POT="$(stt::io::read_param "${tea}" "${PARAM_POT}")" || exit ${?}
+    POT="$(stt::io::read_param "${tea}" "${IO_PARAM_POT}")" || exit ${?}
     pot_config_filepath="$(stt::io::discover_pot_conf_files | grep "${POT}")" || return 1
 
     # shellcheck source=conf/pots/glass.conf
@@ -438,7 +438,7 @@ function stt::setup_params_if_valid_tea() {
     stt::setup_tea_params "${tea}" || return 1
     stt::setup_pot_params "${tea}" || return 1
 
-    TEA_INFUSION_COUNTER="$(stt::io::read_param_grace "${TEA}" "${PARAM_TEA_INFUSION_COUNTER}" || printf '0')"
+    TEA_INFUSION_COUNTER="$(stt::io::read_param_grace "${TEA}" "${IO_PARAM_TEA_INFUSION_COUNTER}" || printf '0')"
 
     return 0
 }
@@ -451,7 +451,7 @@ function stt::setup_pot() {
     echo
     ansi --bold --no-newline "Choose a pot you want to brew in: "
     POT="$(stt::io::discover_pot_conf_files | rev | cut -c 6- | rev | sort | fzf)" || stt::utils::terminate "You have to choose a pot!"
-    stt::io::write_param "${TEA}" "${PARAM_POT}" "${POT}"
+    stt::io::write_param "${TEA}" "${IO_PARAM_POT}" "${POT}"
     stt::setup_pot_params "${TEA}"
     ansi --bold --no-newline "Choose a pot you want to brew in: "
     ansi "${POT_NAME}"
@@ -466,8 +466,8 @@ function stt::setup() {
     ansi --bold --no-newline "Choose a tea you want to brew: "
     ansi "${TEA_NAME}"
 
-    TEA_INFUSION_COUNTER="$(stt::io::read_param_grace "${TEA}" "${PARAM_TEA_INFUSION_COUNTER}" || printf '0')"
-    POT="$(stt::io::read_param_grace "${TEA}" "${PARAM_POT}" || printf '%s' "${UNDEF_VALUE}")"
+    TEA_INFUSION_COUNTER="$(stt::io::read_param_grace "${TEA}" "${IO_PARAM_TEA_INFUSION_COUNTER}" || printf '0')"
+    POT="$(stt::io::read_param_grace "${TEA}" "${IO_PARAM_POT}" || printf '%s' "${UNDEF_VALUE}")"
 
     local ANSWER_NEW_SESSION="new session"
     local ANSWER_RESET="reset infusion counter"
@@ -514,7 +514,7 @@ function stt::setup() {
             read -r answer
 
             if [[ "${answer}" =~ ^[0-9]+$ ]]; then
-                stt::io::write_param "${TEA}" "${PARAM_TEA_INFUSION_COUNTER}" "${answer}"
+                stt::io::write_param "${TEA}" "${IO_PARAM_TEA_INFUSION_COUNTER}" "${answer}"
             else
                 stt::utils::terminate "[${answer}] is not a number!"
             fi
@@ -608,7 +608,7 @@ stt::utils::check_prerequisites
 stt::inputparser::parse_input "${@}"
 
 TEA_INFUSION_COUNTER="$(( TEA_INFUSION_COUNTER + 1 ))"
-stt::io::write_param "${TEA}" "${PARAM_TEA_INFUSION_COUNTER}" "${TEA_INFUSION_COUNTER}"
+stt::io::write_param "${TEA}" "${IO_PARAM_TEA_INFUSION_COUNTER}" "${TEA_INFUSION_COUNTER}"
 
 if [[ "${TEA_INFUSION_COUNTER}" -eq "${TEA_NUMBER_OF_INFUSIONS}" ]]; then
     say "Poslední nálev!" &
