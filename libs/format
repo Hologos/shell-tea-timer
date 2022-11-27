@@ -1,0 +1,33 @@
+#! /usr/bin/env bash
+
+function stt::format::format_seconds() {
+    local seconds="${1}"
+    local placeholder="second"
+
+    if [[ "${seconds}" -ne 1 ]]; then
+        placeholder+="s"
+    fi
+
+    printf '%s %s' "${seconds}" "${placeholder}"
+}
+
+function stt::format::format_infusion_number_ordinal() {
+    printf '%s' "${TEA_INFUSION_COUNTER}"
+
+    case $TEA_INFUSION_COUNTER in
+        1) echo "st";;
+        2) echo "nd";;
+        3) echo "rd";;
+        *) echo "th";;
+    esac
+}
+
+function stt::format::format_infusion_number() {
+    printf '%s infusion' "${TEA_INFUSION_COUNTER}"
+
+    if [[ "${TEA_INFUSION_COUNTER}" -ne 1 ]]; then
+        echo "s"
+    else
+        echo
+    fi
+}

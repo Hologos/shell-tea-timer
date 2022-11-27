@@ -84,6 +84,9 @@ POT_CAPACITY_WITH_LEAVES="${UNDEF_VALUE}"
 # shellcheck source=libs/helpers
 . "${LIBS_DIRPATH}/helpers"
 
+# shellcheck source=libs/format
+. "${LIBS_DIRPATH}/format"
+
 # shellcheck source=libs/debug
 . "${LIBS_DIRPATH}/debug"
 
@@ -102,27 +105,6 @@ function stt::water_temp() {
     echo "${TEA_BREWING_TEMP}$(printf '%s' $'\xc2\xb0')C"
 }
 
-function stt::infusion_number_ordinal() {
-    printf '%s' "${TEA_INFUSION_COUNTER}"
-
-    case $TEA_INFUSION_COUNTER in
-        1) echo "st";;
-        2) echo "nd";;
-        3) echo "rd";;
-        *) echo "th";;
-    esac
-}
-
-function stt::infusion_number() {
-    printf '%s infusion' "${TEA_INFUSION_COUNTER}"
-
-    if [[ "${TEA_INFUSION_COUNTER}" -ne 1 ]]; then
-        echo "s"
-    else
-        echo
-    fi
-}
-
 function stt::calculate_amount() {
     echo "$(echo "scale=1;${POT_CAPACITY_WITH_LEAVES}/100*${TEA_AMOUNT_PER_100G}" | bc) g"
 }
@@ -135,7 +117,7 @@ function stt::calculate_start_of_decanting() {
     local start_of_decanting
     start_of_decanting="$(stt::calculate_start_of_decanting_raw)"
 
-    printf '%s' "$(stt::utils::report_seconds "${start_of_decanting}")"
+    printf '%s' "$(stt::format::format_seconds "${start_of_decanting}")"
 }
 
 function stt::setup_tea_params() {
@@ -215,7 +197,7 @@ function stt::setup() {
     local action_list=( "${ANSWER_NEW_SESSION}" )
 
     if [[ "${TEA_INFUSION_COUNTER}" -gt 0 ]]; then
-        action_message="Previous session found with $(stt::infusion_number). ${action_message}"
+        action_message="Previous session found with $(stt::format::format_infusion_number). ${action_message}"
         action_list+=( "${ANSWER_RESET}" "${ANSWER_SET}" )
     else
         action_list+=( "${ANSWER_SET}" )
@@ -280,7 +262,6 @@ function stt::setup() {
     printf "%s" "${command}" | pbcopy
 }
 
-
 # -- initial setup ------------------------------------------------------------
 
 stt::utils::check_prerequisites
@@ -302,7 +283,7 @@ tea_countdown="$(( TEA_INITIAL_INFUSION_DURATION + (TEA_INFUSION_COUNTER - 1) * 
 
 echo
 echo "You are brewing $(ansi --bold "${TEA_NAME}") in $(ansi --bold "${POT_NAME}") pot."
-echo "This is your $(ansi --bold "$(stt::infusion_number_ordinal)") infusion out of $(ansi --bold "${TEA_NUMBER_OF_INFUSIONS}")."
+echo "This is your $(ansi --bold "$(stt::format::format_infusion_number_ordinal)") infusion out of $(ansi --bold "${TEA_NUMBER_OF_INFUSIONS}")."
 echo "Infuse for $(ansi --bold "${tea_countdown} seconds") in $(ansi --bold "$(stt::water_temp)") water."
 echo "Decanting should start $(ansi --bold "$(stt::calculate_start_of_decanting)") earlier."
 stt::gfx::countdown_start "${tea_countdown}"

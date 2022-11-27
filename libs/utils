@@ -54,17 +54,6 @@ function stt:utils::repeat_char() {
     done
 }
 
-function stt::utils::report_seconds() {
-    local seconds="${1}"
-    local placeholder="second"
-
-    if [[ "${seconds}" -ne 1 ]]; then
-        placeholder+="s"
-    fi
-
-    printf '%s %s' "${seconds}" "${placeholder}"
-}
-
 function stt::utils::get_elapsed_time() {
     local old_time="${1}"
     local new_time="${2}"
