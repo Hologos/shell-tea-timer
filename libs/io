@@ -78,9 +78,8 @@ function stt::io::init() {
         stt::utils::terminate "[${STT_CONFIG_DITPATH}] is not a directory."
     fi
 
-    readonly CONF_DIRPATH="${STT_CONFIG_DITPATH}/conf"
-    readonly TEAS_CONF_DIRPATH="${CONF_DIRPATH}/teas"
-    readonly POTS_CONF_DIRPATH="${CONF_DIRPATH}/pots"
+    readonly TEAS_CONF_DIRPATH="${STT_CONFIG_DITPATH}/teas"
+    readonly POTS_CONF_DIRPATH="${STT_CONFIG_DITPATH}/pots"
 }
 
 function stt::io::reset_infusion_counter() {
