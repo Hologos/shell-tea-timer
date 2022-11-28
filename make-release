@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+set -euo pipefail
+
 readonly TARGET_DIR="${HOME}/Downloads/"
 readonly UNDEF_VALUE="undefined"
 
