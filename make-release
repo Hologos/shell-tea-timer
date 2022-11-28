@@ -1,7 +1,9 @@
 #! /usr/bin/env bash
 
-UNDEF_VALUE="undefined"
-tag="$(git name-rev --tags --name-only "$(git rev-parse HEAD)")"
+readonly TARGET_DIR="${HOME}/Downloads/"
+readonly UNDEF_VALUE="undefined"
+
+readonly tag="$(git name-rev --tags --name-only "$(git rev-parse HEAD)")"
 
 if [[ "${tag}" == "${UNDEF_VALUE}" ]]; then
     >&2 echo
@@ -9,4 +11,4 @@ if [[ "${tag}" == "${UNDEF_VALUE}" ]]; then
     exit 1
 fi
 
-tar -czvf "shell-tea-timer.${tag}.tar.gz" shell-tea-timer conf libs vendor README.md LICENSE
+tar -czvf "${TARGET_DIR}/shell-tea-timer.${tag}.tar.gz" shell-tea-timer conf libs vendor README.md LICENSE
