@@ -107,6 +107,16 @@ function io::reset_infusion_counter() {
     echo "Reseting $(ansi --bold "${TEA_NAME}") infusion counter."
 }
 
+function io::remove_tea_session_data() {
+    local tea="${1}"
+
+    dirpath="$(dirname "${_IO_TMP_FILEPATH_ROOT}")"
+    filename_root="$(basename "${_IO_TMP_FILEPATH_ROOT}")"
+
+    io::discover_files "${dirpath}" "$(io::build_dat_filepath "${tea}" "*" "${filename_root}" "${_IO_TMP_FILE_EXTENSION}")" "0" \
+        | xargs rm -f
+}
+
 function io::save_tea_session_history() {
     local delimiter=";"
     local message=""

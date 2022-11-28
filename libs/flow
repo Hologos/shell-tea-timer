@@ -36,6 +36,36 @@ function flow::ask_pot() {
     ansi "${POT_NAME}"
 }
 
+function flow::end_current_session() {
+    local action_remove_session="Remove tea session"
+    local action_backup_session="Backup tea session for later"
+    local action_list=( "${action_remove_session}" "${action_backup_session}" )
+    local action_message="What should happen to this tea session?"
+    local action
+
+    echo
+    ansi --bold --no-newline "${action_message} "
+    action="$(echo -e "$(IFS=$'\n'; printf '%s' "${action_list[*]}")" | fzf)" || utils::terminate "You have to choose an action!"
+    ansi --bold --no-newline "${action_message} "
+    ansi "${action}"
+
+    case "${action}" in
+        "${action_remove_session}" )
+            echo
+            ansi --bold "Removing this tea session."
+            io::remove_tea_session_data "${TEA}"
+        ;;
+
+        "${action_backup_session}" )
+            echo
+            ansi --bold "Backing up this tea session for later."
+        ;;
+
+        * )
+            utils::terminate "Unknown action [${_MAIN_ACTION}]."
+    esac
+}
+
 function flow::dispatch_main_action() {
     case "${_MAIN_ACTION}" in
         "${_MAIN_ACTION_NEW_SESSION}" )
@@ -105,7 +135,7 @@ function flow::new_session() {
         ansi "${action}"
 
         if [[ "${action}" == "${action_end_session}" ]]; then
-            # TODO: backup / remove ?
+            flow::end_current_session
             break;
         fi
 
