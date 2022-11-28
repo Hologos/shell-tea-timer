@@ -35,6 +35,17 @@ Saving tea session.
 Thank you for using Shell Tea Timer (by Jiří Málek).
 ```
 
+## Table of contents
+
+* [Description](#description)
+    * [Usage](#usage)
+    * [Tea session log](#tea-session-log)
+    * [Configuration files](#configuration-files)
+* [Installation](#installation)
+    * [Dependencies](#dependencies)
+    * [Cloning repo](#cloning-repo)
+* [Keywords](#keywords)
+
 ## Description
 
 ### Usage
