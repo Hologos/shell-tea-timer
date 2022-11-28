@@ -39,6 +39,7 @@ Thank you for using Shell Tea Timer (by hologos).
 
 * [Description](#description)
     * [Usage](#usage)
+    * [Supported actions](#supported-actions)
     * [Tea session log](#tea-session-log)
     * [Configuration files](#configuration-files)
 * [Installation](#installation)
@@ -65,6 +66,14 @@ Environment variables
 ```
 
 You either have to specify the dirpath to configuration files via an argument `-c` or you can set an environment variable `STT_CONFIG_DITPATH`.
+
+### Supported actions
+
+Upon running the script, you can start new tea session or load an existing (unfinished) one.
+
+Upon finishing single infusion, you can continue with another infusion, end the tea session or modify brewing parameters.
+
+When you finish a tea session, you can either remove the tea session and save it for later.
 
 ### Tea session log
 
