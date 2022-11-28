@@ -195,7 +195,7 @@ function flow::log_finished_tea_session() {
 
 function flow::goodbye() {
     echo
-    echo "Thank you for using Shell Tea Timer (by Jiří Málek)."
+    echo "Thank you for using Shell Tea Timer (by hologos)."
 }
 
 function flow::main() {

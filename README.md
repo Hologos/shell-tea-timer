@@ -32,7 +32,7 @@ How would you like to continue? End session
 
 Saving tea session.
 
-Thank you for using Shell Tea Timer (by Jiří Málek).
+Thank you for using Shell Tea Timer (by hologos).
 ```
 
 ## Table of contents
