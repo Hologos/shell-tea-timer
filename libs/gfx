@@ -65,7 +65,7 @@ function stt::gfx::countdown_start() {
         stt:utils::repeat_char "${chars_pre}" "="
         stt:utils::repeat_char "${chars_post}" " "
         printf '%s' '>  '
-        printf '%s%% finished (%s)' "${finished_percents}" "$(stt::format::format_seconds "${seconds_left}")"
+        printf '%s%% finished (%s)' "${finished_percents}" "$(stt::formattting::format_seconds "${seconds_left}")"
 
         if [[ "${seconds_left}" -le 0 ]]; then
             echo

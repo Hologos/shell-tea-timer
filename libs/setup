@@ -73,7 +73,7 @@ function stt::setup::setup() {
     local action_list=( "${ANSWER_NEW_SESSION}" )
 
     if [[ "${TEA_INFUSION_COUNTER}" -gt 0 ]]; then
-        action_message="Previous session found with $(stt::format::format_infusion_number). ${action_message}"
+        action_message="Previous session found with $(stt::formattting::format_infusion_number). ${action_message}"
         action_list+=( "${ANSWER_RESET}" "${ANSWER_SET}" )
     else
         action_list+=( "${ANSWER_SET}" )

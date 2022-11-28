@@ -81,8 +81,8 @@ POT_CAPACITY_WITH_LEAVES="${UNDEF_VALUE}"
 # shellcheck source=libs/helpers
 . "${LIBS_DIRPATH}/helpers"
 
-# shellcheck source=libs/format
-. "${LIBS_DIRPATH}/format"
+# shellcheck source=libs/formatting
+. "${LIBS_DIRPATH}/formatting"
 
 # shellcheck source=libs/debug
 . "${LIBS_DIRPATH}/debug"
@@ -108,7 +108,7 @@ tea_countdown="$(( TEA_INITIAL_INFUSION_DURATION + (TEA_INFUSION_COUNTER - 1) * 
 
 echo
 echo "You are brewing $(ansi --bold "${TEA_NAME}") in $(ansi --bold "${POT_NAME}") pot."
-echo "This is your $(ansi --bold "$(stt::format::format_infusion_number_ordinal)") infusion out of $(ansi --bold "${TEA_NUMBER_OF_INFUSIONS}")."
+echo "This is your $(ansi --bold "$(stt::formattting::format_infusion_number_ordinal)") infusion out of $(ansi --bold "${TEA_NUMBER_OF_INFUSIONS}")."
 echo "Infuse for $(ansi --bold "${tea_countdown} seconds") in $(ansi --bold "$(stt::helpers::water_temp)") water."
 echo "Decanting should start $(ansi --bold "$(stt::helpers::calculate_start_of_decanting)") earlier."
 stt::gfx::countdown_start "${tea_countdown}"

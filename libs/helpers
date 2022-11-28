@@ -16,7 +16,7 @@ function stt::helpers::calculate_start_of_decanting() {
     local start_of_decanting
     start_of_decanting="$(stt::helpers::calculate_start_of_decanting_raw)"
 
-    printf '%s' "$(stt::format::format_seconds "${start_of_decanting}")"
+    printf '%s' "$(stt::formattting::format_seconds "${start_of_decanting}")"
 }
 
 function stt::helpers::get_start_command() {
