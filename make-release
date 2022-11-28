@@ -5,7 +5,7 @@ set -euo pipefail
 readonly TARGET_DIR="${HOME}/Downloads/"
 readonly UNDEF_VALUE="undefined"
 
-readonly tag="$(git name-rev --tags --name-only "$(git rev-parse HEAD)")"
+readonly tag="$(git describe --tags)"
 
 if [[ "${tag}" == "${UNDEF_VALUE}" ]]; then
     >&2 echo
