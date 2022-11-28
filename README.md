@@ -51,35 +51,6 @@ Saving tea session.
 Thank you for using Shell Tea Timer (by Jiří Málek).
 ```
 
-## Installation
-
-**Important:** bash v3.2 and higher is required
-
-1) Download archive from [the release page](https://github.com/Hologos/shell-tea-timer/releases) and unpack it.
-2) Create tea and pot configuration files (follow instructions in section [Configuration files](#configuration-files)).
-3) Run the script.
-
-### Dependencies
-
-If on macOS, make sure you have all those things installed:
-
-- `brew/coreutils`: gnu utils prefixed with `g` (eg. `gdate`)
-
-Make sure you have all those things installed:
-
-- `fzf`: to make this script interactable
-
-### Cloning repo
-
-**Important:** _If you forget to do `peru sync` after every update that contained changed `peru.yaml`, it can have undesirable consequences and can cause serious problems. Use at your own risk._
-
-**Downloading files from release page is preferred!**
-
-```bash
-git clone https://github.com/Hologos/shell-tea-timer
-peru sync
-```
-
 ## Description
 
 ### Usage
@@ -134,6 +105,35 @@ TEA_AMOUNT_PER_100G=3.5
 POT_NAME="Generic 200 ml"
 POT_DECANT_DURATION=5
 POT_CAPACITY_WITH_LEAVES=180
+```
+
+## Installation
+
+**Important:** bash v3.2 and higher is required
+
+1) Download archive from [the release page](https://github.com/Hologos/shell-tea-timer/releases) and unpack it.
+2) Create tea and pot configuration files (follow instructions in section [Configuration files](#configuration-files)).
+3) Run the script.
+
+### Dependencies
+
+If on macOS, make sure you have all those things installed:
+
+- `brew/coreutils`: gnu utils prefixed with `g` (eg. `gdate`)
+
+Make sure you have all those things installed:
+
+- `fzf`: to make this script interactable
+
+### Cloning repo
+
+**Important:** _If you forget to do `peru sync` after every update that contained changed `peru.yaml`, it can have undesirable consequences and can cause serious problems. Use at your own risk._
+
+**Downloading files from release page is preferred!**
+
+```bash
+git clone https://github.com/Hologos/shell-tea-timer
+peru sync
 ```
 
 ## Keywords
