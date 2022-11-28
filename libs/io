@@ -1,26 +1,36 @@
 #! /usr/bin/env bash
 
 readonly _IO_TMP_FILEPATH_ROOT="/tmp/shell-tea-timer"
-readonly _IO_TMP_CONFIG_FILE_EXTENSION="cfg"
+readonly _IO_TMP_FILE_EXTENSION="dat"
 
 readonly _IO_CONFIG_FILE_EXTENSION="conf"
 
 readonly IO_PARAM_POT="pot"
 readonly IO_PARAM_TEA_INFUSION_COUNTER="tea_infusion_counter"
 
-function stt::io::read_param() {
-    local tea="${1}"
+function io::build_dat_filepath() {
+    local tea_name="${1}"
     local param_name="${2}"
+    local filepath="${3}"
+    local file_extension="${4}"
 
-    stt::io::read_param_grace "${tea}" "${param_name}" \
-        || stt::utils::terminate "Parameter [${param_name}] does not exist for tea [${tea}]."
+    printf '%s' "${filepath}.${tea_name}.${param_name}.${file_extension}"
 }
 
-function stt::io::read_param_grace() {
+function io::read_param() {
     local tea="${1}"
     local param_name="${2}"
 
-    local filepath="${_IO_TMP_FILEPATH_ROOT}.${tea}.${param_name}.${_IO_TMP_CONFIG_FILE_EXTENSION}"
+    io::read_param_grace "${tea}" "${param_name}" \
+        || utils::terminate "Parameter [${param_name}] does not exist for tea [${tea}]."
+}
+
+function io::read_param_grace() {
+    local tea="${1}"
+    local param_name="${2}"
+    local filepath
+
+    filepath="$(io::build_dat_filepath "${tea}" "${param_name}" "${_IO_TMP_FILEPATH_ROOT}" "${_IO_TMP_FILE_EXTENSION}")"
 
     if [[ ! -r "${filepath}" ]]; then
         return 1
@@ -29,39 +39,65 @@ function stt::io::read_param_grace() {
     cat "${filepath}"
 }
 
-function stt::io::write_param() {
+function io::write_param() {
     local tea="${1}"
     local param_name="${2}"
     local param_value="${3}"
+    local filepath
 
-    local filepath="${_IO_TMP_FILEPATH_ROOT}.${tea}.${param_name}.${_IO_TMP_CONFIG_FILE_EXTENSION}"
+    filepath="$(io::build_dat_filepath "${tea}" "${param_name}" "${_IO_TMP_FILEPATH_ROOT}" "${_IO_TMP_FILE_EXTENSION}")"
 
     printf '%s' "${param_value}" > "${filepath}" 2> /dev/null
 }
 
-function stt::io::discover_files() {
+function io::discover_files() {
     local dirpath="${1}"
-    local file_ext="${2}"
+    local file_pattern="${2}"
 
     if [[ ! -e "${dirpath}" ]]; then
-        stt::utils::terminate "Directory [${dirpath}] does not exist."
+        utils::terminate "Directory [${dirpath}] does not exist."
     fi
 
     if [[ ! -d "${dirpath}" ]]; then
-        stt::utils::terminate "[${dirpath}] is not a directory."
+        utils::terminate "[${dirpath}] is not a directory."
     fi
 
-    find "${dirpath}" -type f -name "*.${file_ext}" -exec basename {} \;
+    find -L "${dirpath}" -type f -name "${file_pattern}" -exec basename {} \;
 }
 
-function stt::io::discover_tea_conf_files() {
-    stt::io::discover_files "${TEAS_CONF_DIRPATH}" "${_IO_CONFIG_FILE_EXTENSION}"
+function io::discover_tea_conf_files() {
+    io::discover_files "${TEAS_CONF_DIRPATH}" "*.${_IO_CONFIG_FILE_EXTENSION}"
 }
 
-function stt::utils::discover_teas() {
-    stt::io::discover_tea_conf_files | rev | cut -c 6- | rev | sort
+function io::discover_teas() {
+    io::discover_tea_conf_files | rev | cut -c 6- | rev | sort
 }
 
-function stt::io::discover_pot_conf_files() {
-    stt::io::discover_files "${POTS_CONF_DIRPATH}" "${_IO_CONFIG_FILE_EXTENSION}"
+function io::discover_pot_conf_files() {
+    io::discover_files "${POTS_CONF_DIRPATH}" "*.${_IO_CONFIG_FILE_EXTENSION}"
+}
+
+function io::init() {
+    if [[ -z "${STT_CONFIG_DITPATH+_}" ]]; then
+        inputparser::usage
+        utils::terminate "Environment variable STT_CONFIG_DITPATH is not set and dirpath was not passed via an argument."
+    fi
+
+    if [[ ! -e "${STT_CONFIG_DITPATH}" ]]; then
+        utils::terminate "Configuration dirpath [${STT_CONFIG_DITPATH}] doesn't exist."
+    elif [[ ! -d "${STT_CONFIG_DITPATH}" ]]; then
+        utils::terminate "[${STT_CONFIG_DITPATH}] is not a directory."
+    fi
+
+    readonly TEAS_CONF_DIRPATH="${STT_CONFIG_DITPATH}/teas"
+    readonly POTS_CONF_DIRPATH="${STT_CONFIG_DITPATH}/pots"
+}
+
+function io::reset_infusion_counter() {
+    local tea="${1}"
+
+    io::write_param "${tea}" "${IO_PARAM_TEA_INFUSION_COUNTER}" "0"
+
+    echo
+    echo "Reseting $(ansi --bold "${TEA_NAME}") infusion counter."
 }

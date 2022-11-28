@@ -1,3 +1,16 @@
 #! /usr/bin/env bash
 
-tar -czvf shell-tea-timer.tar.gz shell-tea-timer libs vendor stt.example.cfg README.md LICENSE
+set -euo pipefail
+
+readonly TARGET_DIR="${HOME}/Downloads/"
+readonly UNDEF_VALUE="undefined"
+
+readonly tag="$(git name-rev --tags --name-only "$(git rev-parse HEAD)")"
+
+if [[ "${tag}" == "${UNDEF_VALUE}" ]]; then
+    >&2 echo
+    >&2 echo "You have to be on tagged commit!"
+    exit 1
+fi
+
+tar -czvf "${TARGET_DIR}/shell-tea-timer.${tag}.tar.gz" shell-tea-timer conf libs vendor README.md LICENSE

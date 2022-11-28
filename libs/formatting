@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-function stt::format::format_seconds() {
+function formatting::format_seconds() {
     local seconds="${1}"
     local placeholder="second"
 
@@ -11,7 +11,7 @@ function stt::format::format_seconds() {
     printf '%s %s' "${seconds}" "${placeholder}"
 }
 
-function stt::format::format_infusion_number_ordinal() {
+function formattting::format_infusion_number_ordinal() {
     printf '%s' "${TEA_INFUSION_COUNTER}"
 
     case $TEA_INFUSION_COUNTER in
@@ -22,7 +22,7 @@ function stt::format::format_infusion_number_ordinal() {
     esac
 }
 
-function stt::format::format_infusion_number() {
+function formattting::format_infusion_number() {
     printf '%s infusion' "${TEA_INFUSION_COUNTER}"
 
     if [[ "${TEA_INFUSION_COUNTER}" -ne 1 ]]; then
