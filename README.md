@@ -38,7 +38,7 @@ Thank you for using Shell Tea Timer (by Jiří Málek).
 **Important:** bash v3.2 and higher is required
 
 1) Download archive from [the release page](https://github.com/Hologos/shell-tea-timer/releases) and unpack it.
-2) Create tea and pot configuration files (follow instructions in section [Configuration files](#configuration-file)).
+2) Create tea and pot configuration files (follow instructions in section [Configuration files](#configuration-files)).
 3) Run the script.
 
 ### Dependencies
