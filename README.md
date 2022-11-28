@@ -5,7 +5,32 @@ Tracks tea infusions & guides through Gong Fu Cha tea session.
 ```
 $ shell-tea-timer
 
-TODO: script output
+Welcome to Shell Tea Timer
+
+What would you like to do? Start new session
+
+Choose a tea you want to brew:: Day Drinking Diva (raw, sheng)
+
+Choose a pot you want to brew in: White Broken Zhong 100 ml
+
+Heat your water to 95°C.
+
+Use 4.0 g of leaves (5 g per 100 ml, pot capacity is 80 ml).
+
+Press [enter] when you are ready to start.
+
+You are brewing Day Drinking Diva (raw, sheng) in White Broken Zhong 100 ml pot.
+This is your 1st infusion out of 10.
+Infuse for 20 seconds in 95°C water.
+Decanting should start 0 seconds earlier.
+
+<==========>  100% finished (0 seconds)
+
+Decant your tea now!
+
+How would you like to continue? End session
+
+Thank you for using Shell Tea Timer (by Jiří Málek).
 ```
 
 ## Installation
