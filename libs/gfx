@@ -5,6 +5,7 @@ function gfx::countdown_start() {
 
     local bar_length=10
     local cycles_per_second=10
+    local decant_start_reported=0
 
     local sleep_length
     local decant_start
