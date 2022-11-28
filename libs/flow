@@ -147,20 +147,20 @@ function flow::new_session() {
     done
 }
 
-function flow::check_tea_session_recording() {
-    if [[ -z "${STT_TEA_SESSION_HIST_FILEPATH+_}" ]]; then
+function flow::check_tea_session_logging() {
+    if [[ -z "${STT_TEA_SESSION_LOG_FILEPATH+_}" ]]; then
         echo
-        ansi --bold --red "Environment variable \$STT_TEA_SESSION_HIST_FILEPATH is not set, recording tea session history is disabled!"
+        ansi --bold --red "Environment variable \$STT_TEA_SESSION_LOG_FILEPATH is not set, logging finished tea session is disabled!"
         return
     fi
 
     STT_TEA_SESSION_HIST_ENABLED=1
 }
 
-function flow::save_tea_session_history() {
+function flow::log_finished_tea_session() {
     echo
-    ansi --bold "Saving tea session data."
-    io::save_tea_session_history
+    ansi --bold "Saving tea session."
+    io::log_finished_tea_session
 }
 
 function flow::goodbye() {
@@ -172,7 +172,7 @@ function flow::main() {
     echo
     echo "Welcome to Shell Tea Timer"
 
-    flow::check_tea_session_recording
+    flow::check_tea_session_logging
 
     flow::ask_main_action
 
@@ -186,7 +186,7 @@ function flow::main() {
 
     flow::dispatch_main_action
 
-    flow::save_tea_session_history
+    flow::log_finished_tea_session
 
     flow::goodbye
 }

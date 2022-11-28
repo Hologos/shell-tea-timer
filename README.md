@@ -46,7 +46,7 @@ Decant your tea now!
 
 How would you like to continue? End session
 
-Saving tea session data.
+Saving tea session.
 
 Thank you for using Shell Tea Timer (by Jiří Málek).
 ```
@@ -95,14 +95,14 @@ shell-tea-timer [-h] [-c <configs-dirpath>]
 
 Environment variables
     STT_CONFIG_DITPATH - dirpath to configs directory
-    STT_TEA_SESSION_HIST_FILEPATH - filepath to tea session history file
+    STT_TEA_SESSION_LOG_FILEPATH - filepath to finished tea session log file
 ```
 
 You either have to specify the dirpath to configuration files via an argument `-c` or you can set an environment variable `STT_CONFIG_DITPATH`.
 
-### Tea session history data
+### Tea session log
 
-Defining file via `STT_TEA_SESSION_HIST_FILEPATH` enables you to save session info into a CSV file.
+Defining file via `STT_TEA_SESSION_LOG_FILEPATH` enables you to save finisged tea session into a CSV file.
 
 ```csv
 Date & time;Tea name;Pot name;Amount of leaves;Water temperature;Number of infusions;Initial infusion duration;Next infusion duration

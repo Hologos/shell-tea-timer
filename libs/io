@@ -117,16 +117,16 @@ function io::remove_tea_session_data() {
         | xargs rm -f
 }
 
-function io::save_tea_session_history() {
+function io::log_finished_tea_session() {
     local delimiter=";"
     local message=""
 
     if [[ "${STT_TEA_SESSION_HIST_ENABLED}" -ne 1 ]]; then
-        ansi --bold --red "Environment variable \$STT_TEA_SESSION_HIST_FILEPATH is not set, recording tea session history is disabled!"
+        ansi --bold --red "Environment variable \$STT_TEA_SESSION_LOG_FILEPATH is not set, logging finished tea session is disabled!"
         return
     fi
 
-    if [[ ! -e "${STT_TEA_SESSION_HIST_FILEPATH}" ]]; then
+    if [[ ! -e "${STT_TEA_SESSION_LOG_FILEPATH}" ]]; then
         message+="Date & time"
         message+="${delimiter}"
         message+="Tea name"
@@ -143,9 +143,8 @@ function io::save_tea_session_history() {
         message+="${delimiter}"
         message+="Next infusion duration"
 
-        echo "${message}" > "${STT_TEA_SESSION_HIST_FILEPATH}" \
-            || utils::terminate "Cannot save tea session data into [${STT_TEA_SESSION_HIST_FILEPATH}]."
-
+        echo "${message}" > "${STT_TEA_SESSION_LOG_FILEPATH}" \
+            || utils::terminate "Cannot log finished tea session into [${STT_TEA_SESSION_LOG_FILEPATH}]."
     fi
 
     message=""
@@ -165,6 +164,6 @@ function io::save_tea_session_history() {
     message+="${delimiter}"
     message+="$(formatting::format_seconds "${TEA_NEXT_INFUSION_DURATION}")"
 
-    echo "${message}" >> "${STT_TEA_SESSION_HIST_FILEPATH}" \
-        || utils::terminate "Cannot save tea session data into [${STT_TEA_SESSION_HIST_FILEPATH}]."
+    echo "${message}" >> "${STT_TEA_SESSION_LOG_FILEPATH}" \
+        || utils::terminate "Cannot log finished tea session into [${STT_TEA_SESSION_LOG_FILEPATH}]."
 }
