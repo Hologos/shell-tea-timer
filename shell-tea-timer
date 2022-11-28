@@ -94,6 +94,18 @@ ANNOUNCEMENT_TOO_MANY_INFUSIONS="${UNDEF_VALUE}"
 # shellcheck source=libs/debug
 . "${LIBS_DIRPATH}/debug"
 
+case "${STT_OS}" in
+    "${STT_OS_LINUX}")
+        # shellcheck source=libs/utils.linux
+        . "${ABSOLUTE_DIRPATH}/libs/utils.linux"
+    ;;
+
+    "${STT_OS_MACOS}")
+        # shellcheck source=libs/utils.macos
+        . "${ABSOLUTE_DIRPATH}/libs/utils.macos"
+    ;;
+esac
+
 # -- initial setup ------------------------------------------------------------
 
 utils::check_prerequisites

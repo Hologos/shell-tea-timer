@@ -1,0 +1,16 @@
+#! /usr/bin/env bash
+
+function utils::get_elapsed_time() {
+    local old_time="${1}"
+    local new_time="${2}"
+
+    date -d "${new_time} $(date -d "${old_time}" +%s.%N) seconds ago" +%s.%3N
+}
+
+function stt:utils::get_current_datetime() {
+    date +'%Y-%m-%d %H:%M:%S.%N'
+}
+
+function utils::linux::check_prerequisites() {
+    :
+}
