@@ -76,3 +76,12 @@ function setup::setup_tea() {
     TEA="$(io::discover_tea_conf_files | rev | cut -c 6- | rev | sort | fzf)" || utils::terminate "You have to choose a tea!"
     setup::setup_tea_params "${TEA}"
 }
+
+function setup::modify_params() {
+    local next_infusion_duration="${1}"
+    local number_of_infusions="${2}"
+
+    # TODO: validate values
+    TEA_NEXT_INFUSION_DURATION="${next_infusion_duration}"
+    TEA_NUMBER_OF_INFUSIONS="${number_of_infusions}"
+}

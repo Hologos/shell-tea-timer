@@ -71,6 +71,33 @@ function flow::ask_existing_session() {
     setup::setup_params_if_valid_tea "${tea}"
 }
 
+function flow::ask_modify_params() {
+    local answer_next_infusion_duration
+    local answer_number_of_infusions
+    local action_message
+
+    action_message="Next infusion duration:"
+
+    echo
+    ansi --bold --no-newline "${action_message} "
+    read -r answer_next_infusion_duration
+    ansi --no-newline --up --delete-line
+    ansi --bold --no-newline "${action_message} "
+    ansi "${answer_next_infusion_duration}"
+
+    action_message="Number of total infusions:"
+
+    ansi --bold --no-newline "${action_message} "
+    read -r answer_number_of_infusions
+    ansi --no-newline --up --delete-line
+    ansi --bold --no-newline "${action_message} "
+    ansi "${answer_number_of_infusions}"
+
+    setup::modify_params \
+        "${answer_next_infusion_duration}" \
+        "${answer_number_of_infusions}"
+}
+
 function flow::end_current_session() {
     local action_remove_session="Remove tea session"
     local action_backup_session="Backup tea session for later"
@@ -128,7 +155,8 @@ function flow::start_session() {
 
     local action_end_session="End session"
     local action_next_infusion="Next infusion"
-    local action_list=( "${action_next_infusion}" "${action_end_session}" )
+    local action_modify_params="Modify brewing parameters"
+    local action_list=( "${action_next_infusion}" "${action_end_session}" "${action_modify_params}" )
     local action_message="How would you like to continue?"
     local action
     local ready_to_start
@@ -160,16 +188,35 @@ function flow::start_session() {
         echo "Decant your tea now!"
         say "${ANNOUNCEMENT_DECANT_NOW}" &
 
-        echo
-        ansi --bold --no-newline "${action_message} "
-        action="$(echo -e "$(IFS=$'\n'; printf '%s' "${action_list[*]}")" | fzf)" || utils::terminate "You have to choose an action!"
-        ansi --bold --no-newline "${action_message} "
-        ansi "${action}"
+        while true; do
+            echo
+            ansi --bold --no-newline "${action_message} "
+            action="$(echo -e "$(IFS=$'\n'; printf '%s' "${action_list[*]}")" | fzf)" || utils::terminate "You have to choose an action!"
+            ansi --bold --no-newline "${action_message} "
+            ansi "${action}"
 
-        if [[ "${action}" == "${action_end_session}" ]]; then
-            flow::end_current_session
-            break;
-        fi
+            case "${action}" in
+                "${action_end_session}" )
+                    flow::end_current_session
+                    break 2;
+                ;;
+
+                "${action_modify_params}" )
+                    flow::ask_modify_params
+                ;;
+
+                "${action_next_infusion}" )
+                    :
+                ;;
+
+                * )
+                    utils::terminate "Unknown action [${action}]."
+            esac
+
+            if [[ "${action}" != "${action_modify_params}" ]]; then
+                break
+            fi
+        done
 
         echo
         echo
