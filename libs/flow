@@ -97,7 +97,7 @@ function flow::end_current_session() {
         ;;
 
         * )
-            utils::terminate "Unknown action [${_MAIN_ACTION}]."
+            utils::terminate "Unknown action [${action}]."
     esac
 }
 
