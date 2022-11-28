@@ -98,15 +98,16 @@ function flow::new_session() {
         echo "Decant your tea now!"
         say "Do píči čaj."
 
-
-        echo
-        echo
-        echo
         echo
         ansi --bold --no-newline "${action_message} "
         action="$(echo -e "$(IFS=$'\n'; printf '%s' "${action_list[*]}")" | fzf)" || utils::terminate "You have to choose an action!"
         ansi --bold --no-newline "${action_message} "
         ansi "${action}"
+        echo
+        echo
+        echo
+        echo
+        echo
 
         if [[ "${action}" == "${action_end_session}" ]]; then
             # TODO: backup / remove ?
