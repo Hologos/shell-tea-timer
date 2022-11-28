@@ -89,6 +89,8 @@ function flow::end_current_session() {
             echo
             ansi --bold "Removing this tea session."
             io::remove_tea_session_data "${TEA}"
+
+            flow::log_finished_tea_session
         ;;
 
         "${action_backup_session}" )
@@ -211,8 +213,6 @@ function flow::main() {
     flow::check_tea_session_logging
 
     flow::ask_main_action
-
-    flow::log_finished_tea_session
 
     flow::goodbye
 }
