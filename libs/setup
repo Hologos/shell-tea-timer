@@ -33,6 +33,16 @@ function setup::setup_pot_params() {
     utils::check_if_set "pot capacity with leaves" "${POT_CAPACITY_WITH_LEAVES}"
 }
 
+function setup::setup_announcement_params() {
+    # shellcheck source=../conf/announcements/active.conf
+    source "${ANNOUNCEMENTS_CONF_DIRPATH}/active.conf"
+
+    utils::check_if_set "last infusion announcement" "${ANNOUNCEMENT_LAST_INFUSION}"
+    utils::check_if_set "decant now  announcement" "${ANNOUNCEMENT_DECANT_NOW}"
+    utils::check_if_set "start decanting announcement" "${ANNOUNCEMENT_START_DECANTING}"
+    utils::check_if_set "too many infusions announcement" "${ANNOUNCEMENT_TOO_MANY_INFUSIONS}"
+}
+
 function setup::setup_params_if_valid_tea() {
     local tea="${1}"
 

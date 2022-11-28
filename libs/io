@@ -96,6 +96,7 @@ function io::init() {
 
     readonly TEAS_CONF_DIRPATH="${STT_CONFIG_DITPATH}/teas"
     readonly POTS_CONF_DIRPATH="${STT_CONFIG_DITPATH}/pots"
+    readonly ANNOUNCEMENTS_CONF_DIRPATH="${STT_CONFIG_DITPATH}/announcements"
 }
 
 function io::reset_infusion_counter() {

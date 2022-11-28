@@ -55,7 +55,7 @@ function gfx::countdown_start() {
            [[ "${decant_start}" -ge "${MINIMUM_DECANT_TIME}" ]] && \
            [[ "${decant_start_reported}" -eq 0 ]]; then
             decant_start_reported=1
-            say "Začni slévat!" &
+            say "${ANNOUNCEMENT_START_DECANTING}" &
         fi
 
         ansi --no-newline --erase-line=1
