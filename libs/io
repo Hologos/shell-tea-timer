@@ -107,6 +107,26 @@ function io::reset_infusion_counter() {
     echo "Reseting $(ansi --bold "${TEA_NAME}") infusion counter."
 }
 
+function io::discover_tea_sessions() {
+    local dirpath filename_root
+
+    dirpath="$(dirname "${_IO_TMP_FILEPATH_ROOT}")"
+    filename_root="$(basename "${_IO_TMP_FILEPATH_ROOT}")"
+
+    local dat_file filename_root tea param_name filename_extension
+    local pot tea_infusion_counter
+
+    io::discover_files "${dirpath}" "$(io::build_dat_filepath "*" "${IO_PARAM_POT}" "${filename_root}" "${_IO_TMP_FILE_EXTENSION}")" | sort -n | \
+        while IFS=$'\n' read -r dat_file; do
+            echo "${dat_file}" |
+                while IFS="." read -r filename_root tea param_name filename_extension; do
+                    pot="$(io::read_param "${tea}" "${IO_PARAM_POT}")"
+                    tea_infusion_counter="$(io::read_param "${tea}" "${IO_PARAM_TEA_INFUSION_COUNTER}")"
+                    echo "${tea}:${pot}:$(formattting::format_infusion_number "${tea_infusion_counter}")"
+                done
+        done
+}
+
 function io::remove_tea_session_data() {
     local tea="${1}"
 

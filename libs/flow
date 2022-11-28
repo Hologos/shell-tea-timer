@@ -4,7 +4,8 @@ STT_TEA_SESSION_HIST_ENABLED=0
 
 function flow::ask_main_action() {
     local action_new_session="Start new session"
-    local main_action_list=( "${action_new_session}" )
+    local action_load_session="Load existing session"
+    local main_action_list=( "${action_new_session}" "${action_load_session}" )
     local main_action_message="What would you like to do?"
     local action
 
@@ -17,6 +18,10 @@ function flow::ask_main_action() {
     case "${action}" in
         "${action_new_session}" )
             flow::new_session_action
+        ;;
+
+        "${action_load_session}" )
+            flow::load_session_action
         ;;
 
         * )
@@ -42,6 +47,28 @@ function flow::ask_pot() {
     setup::setup_pot
     ansi --bold --no-newline "${message} "
     ansi "${POT_NAME}"
+}
+
+function flow::ask_existing_session() {
+    local action_message="What existing session would you like to load?"
+    local chosen_tea_session
+    local discovered_tea_sessions=()
+    local tea
+
+    while IFS=$'\n' read -r tea_session; do
+        discovered_tea_sessions+=( "${tea_session}" )
+    done < <(io::discover_tea_sessions)
+
+    echo
+    ansi --bold --no-newline "${action_message} "
+    chosen_tea_session="$(echo -e "$(IFS=$'\n'; printf '%s' "${discovered_tea_sessions[*]}")" | fzf)" || utils::terminate "You have to choose existing tea session!"
+    ansi --bold --no-newline "${action_message} "
+    ansi "${chosen_tea_session}"
+
+    echo
+    ansi --bold "Loading existing session."
+    tea="$(echo "${chosen_tea_session}" | cut -d ':' -f 1)"
+    setup::setup_params_if_valid_tea "${tea}"
 }
 
 function flow::end_current_session() {
@@ -83,10 +110,20 @@ function flow::new_session_action() {
 
     gfx::show_recommended_leaf_amount
 
-    flow::start_new_session
+    flow::start_session 0
 }
 
-function flow::start_new_session() {
+function flow::load_session_action() {
+    flow::ask_existing_session
+
+    gfx::show_recommended_water_temp
+
+    flow::start_session "${TEA_INFUSION_COUNTER}"
+}
+
+function flow::start_session() {
+    local tea_infusion_counter="${1}"
+
     local action_end_session="End session"
     local action_next_infusion="Next infusion"
     local action_list=( "${action_next_infusion}" "${action_end_session}" )
@@ -98,7 +135,7 @@ function flow::start_new_session() {
     ansi --bold --no-newline "Press [enter] when you are ready to start."
     read -r ready_to_start
 
-    TEA_INFUSION_COUNTER=0
+    TEA_INFUSION_COUNTER="${tea_infusion_counter}"
 
     while true; do
         TEA_INFUSION_COUNTER="$(( TEA_INFUSION_COUNTER + 1 ))"
