@@ -1,3 +1,12 @@
 #! /usr/bin/env bash
 
-tar -czvf shell-tea-timer.tar.gz shell-tea-timer libs vendor README.md LICENSE
+UNDEF_VALUE="undefined"
+tag="$(git name-rev --tags --name-only "$(git rev-parse HEAD)")"
+
+if [[ "${tag}" == "${UNDEF_VALUE}" ]]; then
+    >&2 echo
+    >&2 echo "You have to be on tagged commit!"
+    exit 1
+fi
+
+tar -czvf "shell-tea-timer.${tag}.tar.gz" shell-tea-timer conf libs vendor README.md LICENSE
