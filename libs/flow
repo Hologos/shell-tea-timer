@@ -71,7 +71,6 @@ function flow::new_session() {
     local action
     local ready_to_start
 
-    # TODO
     echo
     ansi --bold --no-newline "Press [enter] when you are ready to start."
     read -r ready_to_start
@@ -99,7 +98,7 @@ function flow::new_session() {
         echo "Decant your tea now!"
         say "Do píči čaj."
 
-        #debug::report_compensasion_factor
+        debug::report_compensasion_factor
 
         echo
         ansi --bold --no-newline "${action_message} "
