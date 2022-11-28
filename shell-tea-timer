@@ -84,6 +84,9 @@ POT_CAPACITY_WITH_LEAVES="${UNDEF_VALUE}"
 # shellcheck source=libs/formatting
 . "${LIBS_DIRPATH}/formatting"
 
+# shellcheck source=libs/flow
+. "${LIBS_DIRPATH}/flow"
+
 # shellcheck source=libs/debug
 . "${LIBS_DIRPATH}/debug"
 
@@ -93,27 +96,6 @@ utils::check_prerequisites
 
 inputparser::parse_input "${@}"
 
-
-TEA_INFUSION_COUNTER="$(( TEA_INFUSION_COUNTER + 1 ))"
-io::write_param "${TEA}" "${IO_PARAM_TEA_INFUSION_COUNTER}" "${TEA_INFUSION_COUNTER}"
-
-if [[ "${TEA_INFUSION_COUNTER}" -eq "${TEA_NUMBER_OF_INFUSIONS}" ]]; then
-    say "Poslední nálev!" &
-elif [[ "${TEA_INFUSION_COUNTER}" -gt "${TEA_NUMBER_OF_INFUSIONS}" ]]; then
-    say "Už jsi přes čáru." &
-fi
-
 # -- main program -------------------------------------------------------------
 
-tea_countdown="$(( TEA_INITIAL_INFUSION_DURATION + (TEA_INFUSION_COUNTER - 1) * TEA_NEXT_INFUSION_DURATION ))"
-
-echo
-echo "You are brewing $(ansi --bold "${TEA_NAME}") in $(ansi --bold "${POT_NAME}") pot."
-echo "This is your $(ansi --bold "$(formattting::format_infusion_number_ordinal)") infusion out of $(ansi --bold "${TEA_NUMBER_OF_INFUSIONS}")."
-echo "Infuse for $(ansi --bold "${tea_countdown} seconds") in $(ansi --bold "$(helpers::water_temp)") water."
-echo "Decanting should start $(ansi --bold "$(helpers::calculate_start_of_decanting)") earlier."
-gfx::countdown_start "${tea_countdown}"
-echo "Decant your tea now!"
-say "Do píči čaj."
-
-debug::report_compensasion_factor
+flow::main

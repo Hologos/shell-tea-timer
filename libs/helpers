@@ -18,7 +18,3 @@ function helpers::calculate_start_of_decanting() {
 
     printf '%s' "$(formatting::format_seconds "${start_of_decanting}")"
 }
-
-function helpers::get_start_command() {
-    printf '%s %s' "$(basename "${0}")" "${TEA}"
-}

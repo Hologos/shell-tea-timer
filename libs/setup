@@ -45,95 +45,12 @@ function setup::setup_params_if_valid_tea() {
 }
 
 function setup::setup_pot() {
-    echo
-    ansi --bold --no-newline "Choose a pot you want to brew in: "
     POT="$(io::discover_pot_conf_files | rev | cut -c 6- | rev | sort | fzf)" || utils::terminate "You have to choose a pot!"
     io::write_param "${TEA}" "${IO_PARAM_POT}" "${POT}"
     setup::setup_pot_params "${TEA}"
-    ansi --bold --no-newline "Choose a pot you want to brew in: "
-    ansi "${POT_NAME}"
 }
 
-function setup::init() {
-    echo
-    ansi --bold --no-newline "Choose a tea you want to brew: "
+function setup::setup_tea() {
     TEA="$(io::discover_tea_conf_files | rev | cut -c 6- | rev | sort | fzf)" || utils::terminate "You have to choose a tea!"
     setup::setup_tea_params "${TEA}"
-    ansi --bold --no-newline "Choose a tea you want to brew: "
-    ansi "${TEA_NAME}"
-
-    TEA_INFUSION_COUNTER="$(io::read_param_grace "${TEA}" "${IO_PARAM_TEA_INFUSION_COUNTER}" || printf '0')"
-    POT="$(io::read_param_grace "${TEA}" "${IO_PARAM_POT}" || printf '%s' "${UNDEF_VALUE}")"
-
-    local ANSWER_NEW_SESSION="new session"
-    local ANSWER_RESET="reset infusion counter"
-    local ANSWER_SET="set infusion counter"
-    local action_message="What action do you want to do?"
-    local action answer
-    local action_list=( "${ANSWER_NEW_SESSION}" )
-
-    if [[ "${TEA_INFUSION_COUNTER}" -gt 0 ]]; then
-        action_message="Previous session found with $(formattting::format_infusion_number). ${action_message}"
-        action_list+=( "${ANSWER_RESET}" "${ANSWER_SET}" )
-    else
-        action_list+=( "${ANSWER_SET}" )
-    fi
-
-    if [[ "${POT}" != "${UNDEF_VALUE}" ]]; then
-        setup::setup_pot_params "${TEA}"
-    fi
-
-    # TODO: ověřit, že to není nějaké mega staré
-
-    echo
-    ansi --bold --no-newline "${action_message} "
-    action="$(echo -e "$(IFS=$'\n'; printf '%s' "${action_list[*]}")" | fzf)" || utils::terminate "You have to choose an action!"
-    setup::setup_tea_params "${TEA}"
-    ansi --bold --no-newline "${action_message} "
-    ansi "${action}"
-
-    case "${action}" in
-        "${ANSWER_NEW_SESSION}" )
-            setup::setup_pot
-        ;;
-
-        "${ANSWER_RESET}" )
-            io::reset_infusion_counter "${TEA}"
-
-            # TODO: maybe ask, if wants to set pot?
-            setup::setup_pot
-        ;;
-
-        "${ANSWER_SET}" )
-            echo
-            ansi --bold --no-newline "How many infusions have you had? "
-            read -r answer
-
-            if [[ "${answer}" =~ ^[0-9]+$ ]]; then
-                io::write_param "${TEA}" "${IO_PARAM_TEA_INFUSION_COUNTER}" "${answer}"
-            else
-                utils::terminate "[${answer}] is not a number!"
-            fi
-
-            if [[ "${POT}" != "${UNDEF_VALUE}" ]]; then
-                setup::setup_pot
-            fi
-        ;;
-
-        * )
-            utils::terminate "Unknown action [${action}]."
-    esac
-
-    echo
-    echo "Heat your water to $(ansi --bold "$(helpers::water_temp)")."
-
-    echo
-    echo "Use $(ansi --bold "$(helpers::calculate_leaves_amount)") of leaves (${TEA_AMOUNT_PER_100G} g per 100 ml, pot capacity is ${POT_CAPACITY_WITH_LEAVES} ml)."
-
-    local command
-    command="$(helpers::get_start_command)"
-
-    echo
-    ansi --bold "Your command has been copied to your clipboard!"
-    printf "%s" "${command}" | pbcopy
 }

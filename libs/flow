@@ -1,0 +1,133 @@
+#! /usr/bin/env bash
+
+_MAIN_ACTION="${UNDEF_VALUE}"
+_MAIN_ACTION_NEW_SESSION="Start new session"
+
+function flow::ask_main_action() {
+    local main_action_list=( "${_MAIN_ACTION_NEW_SESSION}" )
+    local main_action_message="What would you like to do?"
+
+    echo
+    ansi --bold --no-newline "${main_action_message} "
+    _MAIN_ACTION="$(echo -e "$(IFS=$'\n'; printf '%s' "${main_action_list[*]}")" | fzf)" || utils::terminate "You have to choose an action!"
+    ansi --bold --no-newline "${main_action_message} "
+    ansi "${_MAIN_ACTION}"
+}
+
+function flow::ask_tea() {
+    local message="Choose a tea you want to brew:"
+
+    echo
+    ansi --bold --no-newline "${message}: "
+    setup::setup_tea
+    ansi --bold --no-newline "${message}: "
+    ansi "${TEA_NAME}"
+}
+
+function flow::ask_pot() {
+    local message="Choose a pot you want to brew in:"
+
+    echo
+    ansi --bold --no-newline "${message} "
+    setup::setup_pot
+    ansi --bold --no-newline "${message} "
+    ansi "${POT_NAME}"
+}
+
+function flow::dispatch_main_action() {
+    case "${_MAIN_ACTION}" in
+        "${_MAIN_ACTION_NEW_SESSION}" )
+            flow::new_session
+        ;;
+
+        "${ANSWER_SET}" )
+            echo
+            ansi --bold --no-newline "How many infusions have you had? "
+            read -r answer
+
+            if [[ "${answer}" =~ ^[0-9]+$ ]]; then
+                io::write_param "${TEA}" "${IO_PARAM_TEA_INFUSION_COUNTER}" "${answer}"
+            else
+                utils::terminate "[${answer}] is not a number!"
+            fi
+
+            if [[ "${POT}" != "${UNDEF_VALUE}" ]]; then
+                setup::setup_pot
+            fi
+        ;;
+
+        * )
+            utils::terminate "Unknown action [${_MAIN_ACTION}]."
+    esac
+}
+
+function flow::new_session() {
+    local action_end_session="End session"
+    local action_next_infusion="Next infusion"
+    local action_list=( "${action_next_infusion}" "${action_end_session}" )
+    local action_message="How would you like to continue?"
+    local action
+    local ready_to_start
+
+    # TODO
+    echo
+    ansi --bold --no-newline "Press [enter] when you are ready to start."
+    read -r ready_to_start
+
+    TEA_INFUSION_COUNTER=0
+
+    while true; do
+        TEA_INFUSION_COUNTER="$(( TEA_INFUSION_COUNTER + 1 ))"
+        io::write_param "${TEA}" "${IO_PARAM_TEA_INFUSION_COUNTER}" "${TEA_INFUSION_COUNTER}"
+
+        if [[ "${TEA_INFUSION_COUNTER}" -eq "${TEA_NUMBER_OF_INFUSIONS}" ]]; then
+            say "Poslední nálev!" &
+        elif [[ "${TEA_INFUSION_COUNTER}" -gt "${TEA_NUMBER_OF_INFUSIONS}" ]]; then
+            say "Už jsi přes čáru." &
+        fi
+
+        infuse_duration="$(( TEA_INITIAL_INFUSION_DURATION + (TEA_INFUSION_COUNTER - 1) * TEA_NEXT_INFUSION_DURATION ))"
+
+        echo
+        echo "You are brewing $(ansi --bold "${TEA_NAME}") in $(ansi --bold "${POT_NAME}") pot."
+        echo "This is your $(ansi --bold "$(formattting::format_infusion_number_ordinal)") infusion out of $(ansi --bold "${TEA_NUMBER_OF_INFUSIONS}")."
+        echo "Infuse for $(ansi --bold "$(formatting::format_seconds "${infuse_duration}")") in $(ansi --bold "$(helpers::water_temp)") water."
+        echo "Decanting should start $(ansi --bold "$(helpers::calculate_start_of_decanting)") earlier."
+        gfx::countdown_start "${infuse_duration}"
+        echo "Decant your tea now!"
+        say "Do píči čaj."
+
+        #debug::report_compensasion_factor
+
+        echo
+        ansi --bold --no-newline "${action_message} "
+        action="$(echo -e "$(IFS=$'\n'; printf '%s' "${action_list[*]}")" | fzf)" || utils::terminate "You have to choose an action!"
+        ansi --bold --no-newline "${action_message} "
+        ansi "${action}"
+
+        if [[ "${action}" == "${action_end_session}" ]]; then
+            # TODO: backup / remove ?
+            break;
+        fi
+    done
+
+    echo
+    echo "Thank you for using Shell Tea Timer (by Jiří Málek)."
+}
+
+function flow::main() {
+    echo
+    echo "Welcome to Shell Tea Timer"
+
+    flow::ask_main_action
+
+    flow::ask_tea
+
+    flow::ask_pot
+
+    gfx::show_recommended_water_temp
+
+    gfx::show_recommended_leaf_amount
+
+    flow::dispatch_main_action
+}

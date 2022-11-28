@@ -79,3 +79,13 @@ function gfx::countdown_start() {
 
     echo
 }
+
+function gfx::show_recommended_water_temp() {
+    echo
+    echo "Heat your water to $(ansi --bold "$(helpers::water_temp)")."
+}
+
+function gfx::show_recommended_leaf_amount() {
+    echo
+    echo "Use $(ansi --bold "$(helpers::calculate_leaves_amount)") of leaves (${TEA_AMOUNT_PER_100G} g per 100 ml, pot capacity is ${POT_CAPACITY_WITH_LEAVES} ml)."
+}
