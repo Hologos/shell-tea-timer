@@ -101,6 +101,9 @@ function flow::new_session() {
         debug::report_compensasion_factor
 
         echo
+        echo
+        echo
+        echo
         ansi --bold --no-newline "${action_message} "
         action="$(echo -e "$(IFS=$'\n'; printf '%s' "${action_list[*]}")" | fzf)" || utils::terminate "You have to choose an action!"
         ansi --bold --no-newline "${action_message} "
