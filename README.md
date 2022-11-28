@@ -77,7 +77,7 @@ When you finish a tea session, you can either remove the tea session and save it
 
 ### Tea session log
 
-Defining file via `STT_TEA_SESSION_LOG_FILEPATH` enables you to save finisged tea session into a CSV file.
+Defining file via `STT_TEA_SESSION_LOG_FILEPATH` enables you to save finished tea session into a CSV file.
 
 ```csv
 Date & time;Tea name;Pot name;Amount of leaves;Water temperature;Number of infusions;Initial infusion duration;Next infusion duration
