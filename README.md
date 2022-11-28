@@ -83,7 +83,11 @@ You either have to specify the dirpath to configuration files via an argument `-
 
 ### Configuration files
 
-You can make your own set of tea & pot configuration files. This project comes with generic configuration files, courtesy of [Mei Leaf](https://meileaf.com).
+_This project comes with generic configuration files, courtesy of [Mei Leaf](https://meileaf.com)._
+
+You can make your own set of tea & pot configuration files.
+
+The configuration folder has to have `pots` and `teas` subdirectory. Files have to have `.conf` file extension and required format (see bellow).
 
 **Tea example:**
 
