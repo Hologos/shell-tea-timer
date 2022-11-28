@@ -1,19 +1,27 @@
 #! /usr/bin/env bash
 
-_MAIN_ACTION="${UNDEF_VALUE}"
-_MAIN_ACTION_NEW_SESSION="Start new session"
-
 STT_TEA_SESSION_HIST_ENABLED=0
 
 function flow::ask_main_action() {
-    local main_action_list=( "${_MAIN_ACTION_NEW_SESSION}" )
+    local action_new_session="Start new session"
+    local main_action_list=( "${action_new_session}" )
     local main_action_message="What would you like to do?"
+    local action
 
     echo
     ansi --bold --no-newline "${main_action_message} "
-    _MAIN_ACTION="$(echo -e "$(IFS=$'\n'; printf '%s' "${main_action_list[*]}")" | fzf)" || utils::terminate "You have to choose an action!"
+    action="$(echo -e "$(IFS=$'\n'; printf '%s' "${main_action_list[*]}")" | fzf)" || utils::terminate "You have to choose an action!"
     ansi --bold --no-newline "${main_action_message} "
-    ansi "${_MAIN_ACTION}"
+    ansi "${action}"
+
+    case "${action}" in
+        "${action_new_session}" )
+            flow::new_session_action
+        ;;
+
+        * )
+            utils::terminate "Unknown action [${action}]."
+    esac
 }
 
 function flow::ask_tea() {
@@ -66,34 +74,19 @@ function flow::end_current_session() {
     esac
 }
 
-function flow::dispatch_main_action() {
-    case "${_MAIN_ACTION}" in
-        "${_MAIN_ACTION_NEW_SESSION}" )
-            flow::new_session
-        ;;
+function flow::new_session_action() {
+    flow::ask_tea
 
-        "${ANSWER_SET}" )
-            echo
-            ansi --bold --no-newline "How many infusions have you had? "
-            read -r answer
+    flow::ask_pot
 
-            if [[ "${answer}" =~ ^[0-9]+$ ]]; then
-                io::write_param "${TEA}" "${IO_PARAM_TEA_INFUSION_COUNTER}" "${answer}"
-            else
-                utils::terminate "[${answer}] is not a number!"
-            fi
+    gfx::show_recommended_water_temp
 
-            if [[ "${POT}" != "${UNDEF_VALUE}" ]]; then
-                setup::setup_pot
-            fi
-        ;;
+    gfx::show_recommended_leaf_amount
 
-        * )
-            utils::terminate "Unknown action [${_MAIN_ACTION}]."
-    esac
+    flow::start_new_session
 }
 
-function flow::new_session() {
+function flow::start_new_session() {
     local action_end_session="End session"
     local action_next_infusion="Next infusion"
     local action_list=( "${action_next_infusion}" "${action_end_session}" )
@@ -175,16 +168,6 @@ function flow::main() {
     flow::check_tea_session_logging
 
     flow::ask_main_action
-
-    flow::ask_tea
-
-    flow::ask_pot
-
-    gfx::show_recommended_water_temp
-
-    gfx::show_recommended_leaf_amount
-
-    flow::dispatch_main_action
 
     flow::log_finished_tea_session
 
