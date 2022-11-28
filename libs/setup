@@ -7,8 +7,12 @@ function setup::setup_tea_params() {
     TEA="${tea}"
     tea_config_filepath="$(io::discover_tea_conf_files | grep "${tea}")" || return 1
 
+    local filepath="${TEAS_CONF_DIRPATH}/${tea_config_filepath}"
+
+    io::is_existing_readable_file "${filepath}"
+
     # shellcheck source=../conf/teas/generic-green.conf
-    source "${TEAS_CONF_DIRPATH}/${tea_config_filepath}"
+    source "${filepath}"
 
     utils::check_if_set "tea name" "${TEA_NAME}"
     utils::check_if_set "initial infusion duration" "${TEA_INITIAL_INFUSION_DURATION}"
@@ -25,8 +29,12 @@ function setup::setup_pot_params() {
     POT="$(io::read_param "${tea}" "${IO_PARAM_POT}")" || exit ${?}
     pot_config_filepath="$(io::discover_pot_conf_files | grep "${POT}")" || return 1
 
+    local filepath="${POTS_CONF_DIRPATH}/${pot_config_filepath}"
+
+    io::is_existing_readable_file "${filepath}"
+
     # shellcheck source=../conf/pots/generic-pot.conf
-    source "${POTS_CONF_DIRPATH}/${pot_config_filepath}"
+    source "${filepath}"
 
     utils::check_if_set "pot name" "${POT_NAME}"
     utils::check_if_set "pot decant duration" "${POT_DECANT_DURATION}"
@@ -34,8 +42,12 @@ function setup::setup_pot_params() {
 }
 
 function setup::setup_announcement_params() {
+    local filepath="${ANNOUNCEMENTS_CONF_DIRPATH}/active.conf"
+
+    io::is_existing_readable_file "${filepath}"
+
     # shellcheck source=../conf/announcements/active.conf
-    source "${ANNOUNCEMENTS_CONF_DIRPATH}/active.conf"
+    source "${filepath}"
 
     utils::check_if_set "last infusion announcement" "${ANNOUNCEMENT_LAST_INFUSION}"
     utils::check_if_set "decant now  announcement" "${ANNOUNCEMENT_DECANT_NOW}"

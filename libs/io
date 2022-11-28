@@ -188,3 +188,19 @@ function io::log_finished_tea_session() {
     echo "${message}" >> "${STT_TEA_SESSION_LOG_FILEPATH}" \
         || utils::terminate "Cannot log finished tea session into [${STT_TEA_SESSION_LOG_FILEPATH}]."
 }
+
+function io::is_existing_readable_file() {
+    local filepath="${filepath}"
+
+    if [[ ! -e "${filepath}" ]]; then
+        utils::terminate "File [${filepath}] does not exist!"
+    fi
+
+    if [[ ! -f "${filepath}" ]]; then
+        utils::terminate "[${filepath}] is not a file!"
+    fi
+
+    if [[ ! -r "${filepath}" ]]; then
+        utils::terminate "File [${filepath}] is not readable!"
+    fi
+}
