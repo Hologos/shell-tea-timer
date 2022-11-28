@@ -98,7 +98,6 @@ function flow::new_session() {
         echo "Decant your tea now!"
         say "Do píči čaj."
 
-        debug::report_compensasion_factor
 
         echo
         echo
