@@ -28,7 +28,25 @@ Decanting should start 0 seconds earlier.
 
 Decant your tea now!
 
+How would you like to continue? Next infusion
+
+
+
+
+
+
+You are brewing Day Drinking Diva (raw, sheng) in White Broken Zhong 100 ml pot.
+This is your 2nd infusion out of 10.
+Infuse for 25 seconds in 95°C water.
+Decanting should start 0 seconds earlier.
+
+<==========>  100% finished (0 seconds)
+
+Decant your tea now!
+
 How would you like to continue? End session
+
+Saving tea session data.
 
 Thank you for using Shell Tea Timer (by Jiří Málek).
 ```
