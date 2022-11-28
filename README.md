@@ -55,7 +55,7 @@ Make sure you have all those things installed:
 
 **Important:** _If you forget to do `peru sync` after every update that contained changed `peru.yaml`, it can have undesirable consequences and can cause serious problems. Use at your own risk._
 
-_Downloading files from release page is preferred._
+**Downloading files from release page is preferred!**
 
 ```bash
 git clone https://github.com/Hologos/shell-tea-timer
