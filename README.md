@@ -77,9 +77,19 @@ shell-tea-timer [-h] [-c <configs-dirpath>]
 
 Environment variables
     STT_CONFIG_DITPATH - dirpath to configs directory
+    STT_TEA_SESSION_HIST_FILEPATH - filepath to tea session history file
 ```
 
 You either have to specify the dirpath to configuration files via an argument `-c` or you can set an environment variable `STT_CONFIG_DITPATH`.
+
+### Tea session history data
+
+Defining file via `STT_TEA_SESSION_HIST_FILEPATH` enables you to save session info into a CSV file.
+
+```csv
+Date & time;Tea name;Pot name;Amount of leaves;Water temperature;Number of infusions;Initial infusion duration;Next infusion duration
+28.11.2022 14:57;Generic Green Tea;Yixing Pot 180 ml;5.6 g;80°C;3;15 seconds;3 seconds
+```
 
 ### Configuration files
 

@@ -22,6 +22,7 @@ function inputparser::usage() {
     >&2 echo
     >&2 echo "${fmt_underline}Environment variables${fmt_reset}"
     >&2 echo "    ${fmt_bold}STT_CONFIG_DITPATH${fmt_reset} - dirpath to configs directory"
+    >&2 echo "    ${fmt_bold}STT_TEA_SESSION_HIST_FILEPATH${fmt_reset} - filepath to tea session history file"
 }
 
 function inputparser::parse_input() {

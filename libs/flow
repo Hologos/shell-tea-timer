@@ -3,6 +3,8 @@
 _MAIN_ACTION="${UNDEF_VALUE}"
 _MAIN_ACTION_NEW_SESSION="Start new session"
 
+STT_TEA_SESSION_HIST_ENABLED=0
+
 function flow::ask_main_action() {
     local main_action_list=( "${_MAIN_ACTION_NEW_SESSION}" )
     local main_action_message="What would you like to do?"
@@ -110,7 +112,25 @@ function flow::new_session() {
             break;
         fi
     done
+}
 
+function flow::check_tea_session_recording() {
+    if [[ -z "${STT_TEA_SESSION_HIST_FILEPATH+_}" ]]; then
+        echo
+        ansi --bold --red "Environment variable \$STT_TEA_SESSION_HIST_FILEPATH is not set, recording tea session history is disabled!"
+        return
+    fi
+
+    STT_TEA_SESSION_HIST_ENABLED=1
+}
+
+function flow::save_tea_session_history() {
+    echo
+    ansi --bold "Saving tea session data."
+    io::save_tea_session_history
+}
+
+function flow::goodbye() {
     echo
     echo "Thank you for using Shell Tea Timer (by Jiří Málek)."
 }
@@ -118,6 +138,8 @@ function flow::new_session() {
 function flow::main() {
     echo
     echo "Welcome to Shell Tea Timer"
+
+    flow::check_tea_session_recording
 
     flow::ask_main_action
 
@@ -130,4 +152,8 @@ function flow::main() {
     gfx::show_recommended_leaf_amount
 
     flow::dispatch_main_action
+
+    flow::save_tea_session_history
+
+    flow::goodbye
 }
