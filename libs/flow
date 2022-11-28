@@ -114,7 +114,7 @@ function flow::start_new_session() {
 
         echo
         echo "You are brewing $(ansi --bold "${TEA_NAME}") in $(ansi --bold "${POT_NAME}") pot."
-        echo "This is your $(ansi --bold "$(formattting::format_infusion_number_ordinal)") infusion out of $(ansi --bold "${TEA_NUMBER_OF_INFUSIONS}")."
+        echo "This is your $(ansi --bold "$(formattting::format_infusion_number_ordinal "${TEA_INFUSION_COUNTER}")") infusion out of $(ansi --bold "${TEA_NUMBER_OF_INFUSIONS}")."
         echo "Infuse for $(ansi --bold "$(formatting::format_seconds "${infuse_duration}")") in $(ansi --bold "$(helpers::water_temp)") water."
         echo "Decanting should start $(ansi --bold "$(helpers::calculate_start_of_decanting)") earlier."
         gfx::countdown_start "${infuse_duration}"

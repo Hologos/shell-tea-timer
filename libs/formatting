@@ -12,9 +12,11 @@ function formatting::format_seconds() {
 }
 
 function formattting::format_infusion_number_ordinal() {
-    printf '%s' "${TEA_INFUSION_COUNTER}"
+    local tea_infusion_counter="${1}"
 
-    case $TEA_INFUSION_COUNTER in
+    printf '%s' "${tea_infusion_counter}"
+
+    case "${tea_infusion_counter}" in
         1) echo "st";;
         2) echo "nd";;
         3) echo "rd";;
@@ -23,9 +25,11 @@ function formattting::format_infusion_number_ordinal() {
 }
 
 function formattting::format_infusion_number() {
-    printf '%s infusion' "${TEA_INFUSION_COUNTER}"
+    local tea_infusion_counter="${1}"
 
-    if [[ "${TEA_INFUSION_COUNTER}" -ne 1 ]]; then
+    printf '%s infusion' "${tea_infusion_counter}"
+
+    if [[ "${tea_infusion_counter}" -ne 1 ]]; then
         echo "s"
     else
         echo
