@@ -53,6 +53,7 @@ function io::write_param() {
 function io::discover_files() {
     local dirpath="${1}"
     local file_pattern="${2}"
+    local basename_only="${3:-1}"
 
     if [[ ! -e "${dirpath}" ]]; then
         utils::terminate "Directory [${dirpath}] does not exist."
@@ -62,7 +63,11 @@ function io::discover_files() {
         utils::terminate "[${dirpath}] is not a directory."
     fi
 
-    find -L "${dirpath}" -type f -name "${file_pattern}" -exec basename {} \;
+    if [[ "${basename_only}" -eq 1 ]]; then
+        find -L "${dirpath}" -type f -name "${file_pattern}" -exec basename {} \;
+    else
+        find -L "${dirpath}" -type f -name "${file_pattern}"
+    fi
 }
 
 function io::discover_tea_conf_files() {
