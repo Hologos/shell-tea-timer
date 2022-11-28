@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-function stt::gfx::countdown_start() {
+function gfx::countdown_start() {
     local duration="${1}"
 
     local bar_length=10
@@ -20,16 +20,16 @@ function stt::gfx::countdown_start() {
     _DEBUG_COMPENSATION_FACTOR_CHECK_START="${SECONDS}"
 
     sleep_length="$(echo "scale=2;1/${cycles_per_second}" | bc)"
-    decant_start="$(stt::helpers::calculate_start_of_decanting_raw)"
+    decant_start="$(helpers::calculate_start_of_decanting_raw)"
     datetime_start="$(stt:utils::get_current_datetime)"
 
     echo
 
     while true; do
         datetime_current="$(stt:utils::get_current_datetime)"
-        sec_milisec_diff="$(stt::utils::get_elapsed_time "${datetime_start}" "${datetime_current}")"
+        sec_milisec_diff="$(utils::get_elapsed_time "${datetime_start}" "${datetime_current}")"
         seconds_left="$(echo "scale=0;(${duration} - ${sec_milisec_diff} + 1)/1" | bc)" # +1 due to how rounding -0.xx works
-        finished_percents="$(stt::utils::get_finished_percentage "${sec_milisec_diff}" "${duration}")"
+        finished_percents="$(utils::get_finished_percentage "${sec_milisec_diff}" "${duration}")"
 
         chars_pre="$(echo "scale=0;(${finished_percents}/${bar_length})/1" | bc)"
         chars_post="$(echo "scale=0;${bar_length} - ${chars_pre}" | bc)"
@@ -65,7 +65,7 @@ function stt::gfx::countdown_start() {
         stt:utils::repeat_char "${chars_pre}" "="
         stt:utils::repeat_char "${chars_post}" " "
         printf '%s' '>  '
-        printf '%s%% finished (%s)' "${finished_percents}" "$(stt::formattting::format_seconds "${seconds_left}")"
+        printf '%s%% finished (%s)' "${finished_percents}" "$(formattting::format_seconds "${seconds_left}")"
 
         if [[ "${seconds_left}" -le 0 ]]; then
             echo

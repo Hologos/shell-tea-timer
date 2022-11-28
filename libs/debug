@@ -4,7 +4,7 @@ _DEBUG_COMPENSATION_FACTOR_CHECK_START=0
 _DEBUG_COMPENSATION_FACTOR_CHECK_FINISH=0
 _DEBUG_COMPENSATION_FACTOR_CHECK_DESIRED_DURATION=0
 
-function stt::debug::report_compensasion_factor() {
+function debug::report_compensasion_factor() {
     local real_world_duration duration_diff slowness_compensation_factor
 
     echo

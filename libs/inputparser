@@ -3,7 +3,7 @@
 readonly _OPTION_HELP="-h"
 readonly _OPTION_CONFIG_DIRPATH="-c"
 
-function stt::inputparser::usage() {
+function inputparser::usage() {
     # shellcheck disable=SC2155
     local fmt_bold="$(ansi --bold --no-restore)"
     # shellcheck disable=SC2155
@@ -24,15 +24,15 @@ function stt::inputparser::usage() {
     >&2 echo "    ${fmt_bold}STT_CONFIG_DITPATH${fmt_reset} - dirpath to configs directory"
 }
 
-function stt::inputparser::parse_input() {
+function inputparser::parse_input() {
     while [[ ${#} -ne 0 ]] && [[ "${1}" != "" ]]; do
         local input="${1}"
 
         case "${input}" in
 
             "${_OPTION_HELP}" )
-                stt::inputparser::usage
-                stt::utils::terminate
+                inputparser::usage
+                utils::terminate
             ;;
 
             "${_OPTION_CONFIG_DIRPATH}" )
@@ -41,12 +41,12 @@ function stt::inputparser::parse_input() {
             ;;
 
             * )
-                stt::inputparser::usage
-                stt::utils::terminate "Unknown option [${input}]."
+                inputparser::usage
+                utils::terminate "Unknown option [${input}]."
         esac
 
         shift
     done
 
-    stt::io::init
+    io::init
 }
