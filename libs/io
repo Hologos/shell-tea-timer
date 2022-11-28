@@ -51,7 +51,7 @@ function io::discover_files() {
         utils::terminate "[${dirpath}] is not a directory."
     fi
 
-    find "${dirpath}" -type f -name "${file_pattern}" -exec basename {} \;
+    find -L "${dirpath}" -type f -name "${file_pattern}" -exec basename {} \;
 }
 
 function io::discover_tea_conf_files() {
