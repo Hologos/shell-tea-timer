@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-function formattting::format_seconds() {
+function formatting::format_seconds() {
     local seconds="${1}"
     local placeholder="second"
 
