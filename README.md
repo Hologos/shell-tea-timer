@@ -1,6 +1,6 @@
 # Shell Tea Timer
 
-Tracks tea infusions & guides through Gong Fu Cha tea session.
+Tracks tea infusions & guides you through Gong Fu Cha tea session.
 
 ```
 $ shell-tea-timer
