@@ -17,7 +17,7 @@ function setup::setup_tea_params() {
     utils::check_if_set "tea name" "${TEA_NAME}"
     utils::check_if_set "initial infusion duration" "${TEA_INITIAL_INFUSION_DURATION}"
     utils::check_if_set "next infusion duration" "${TEA_NEXT_INFUSION_DURATION}"
-    utils::check_if_set "number of infusions" "${TEA_NUMBER_OF_INFUSIONS}"
+    utils::check_if_set "number of total infusions" "${TEA_NUMBER_OF_INFUSIONS}"
     utils::check_if_set "brewing temperature" "${TEA_BREWING_TEMP}"
     utils::check_if_set "amount per 100g" "${TEA_AMOUNT_PER_100G}"
 }
