@@ -20,9 +20,9 @@ function flow::ask_tea() {
     local message="Choose a tea you want to brew:"
 
     echo
-    ansi --bold --no-newline "${message}: "
+    ansi --bold --no-newline "${message} "
     setup::setup_tea
-    ansi --bold --no-newline "${message}: "
+    ansi --bold --no-newline "${message} "
     ansi "${TEA_NAME}"
 }
 

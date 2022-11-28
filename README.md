@@ -9,7 +9,7 @@ Welcome to Shell Tea Timer
 
 What would you like to do? Start new session
 
-Choose a tea you want to brew:: Day Drinking Diva (raw, sheng)
+Choose a tea you want to brew: Day Drinking Diva (raw, sheng)
 
 Choose a pot you want to brew in: White Broken Zhong 100 ml
 
