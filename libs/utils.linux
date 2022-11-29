@@ -12,5 +12,7 @@ function stt:utils::get_current_datetime() {
 }
 
 function utils::linux::check_prerequisites() {
-    :
+    if ! utils::is_installed "espeak"; then
+        utils::terminate "espeak is not installed"
+    fi
 }

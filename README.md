@@ -125,6 +125,10 @@ If on macOS, make sure you have all those things installed:
 
 - `brew/coreutils`: gnu utils prefixed with `g` (eg. `gdate`)
 
+If on linux, make sure you have all those things installed:
+
+- `espeak`: to hear audio announcements
+
 Make sure you have all those things installed:
 
 - `fzf`: to make this script interactable
