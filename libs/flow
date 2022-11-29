@@ -172,9 +172,9 @@ function flow::start_session() {
         io::write_param "${TEA}" "${IO_PARAM_TEA_INFUSION_COUNTER}" "${TEA_INFUSION_COUNTER}"
 
         if [[ "${TEA_INFUSION_COUNTER}" -eq "${TEA_NUMBER_OF_INFUSIONS}" ]]; then
-            say "${ANNOUNCEMENT_LAST_INFUSION}" &
+            audio::announce "${ANNOUNCEMENT_LAST_INFUSION}" &
         elif [[ "${TEA_INFUSION_COUNTER}" -gt "${TEA_NUMBER_OF_INFUSIONS}" ]]; then
-            say "${ANNOUNCEMENT_TOO_MANY_INFUSIONS}" &
+            audio::announce "${ANNOUNCEMENT_TOO_MANY_INFUSIONS}" &
         fi
 
         infuse_duration="$(( TEA_INITIAL_INFUSION_DURATION + (TEA_INFUSION_COUNTER - 1) * TEA_NEXT_INFUSION_DURATION ))"
@@ -186,7 +186,7 @@ function flow::start_session() {
         echo "Decanting should start $(ansi --bold "$(helpers::calculate_start_of_decanting)") earlier."
         gfx::countdown_start "${infuse_duration}"
         echo "Decant your tea now!"
-        say "${ANNOUNCEMENT_DECANT_NOW}" &
+        audio::announce "${ANNOUNCEMENT_DECANT_NOW}" &
 
         while true; do
             echo

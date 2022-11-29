@@ -98,11 +98,17 @@ case "${STT_OS}" in
     "${STT_OS_LINUX}")
         # shellcheck source=libs/utils.linux
         . "${ABSOLUTE_DIRPATH}/libs/utils.linux"
+
+        # shellcheck source=libs/audio.linux
+        . "${ABSOLUTE_DIRPATH}/libs/audio.linux"
     ;;
 
     "${STT_OS_MACOS}")
         # shellcheck source=libs/utils.macos
         . "${ABSOLUTE_DIRPATH}/libs/utils.macos"
+
+        # shellcheck source=libs/audio.macos
+        . "${ABSOLUTE_DIRPATH}/libs/audio.macos"
     ;;
 esac
 

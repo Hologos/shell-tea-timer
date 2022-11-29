@@ -1,0 +1,7 @@
+#! /usr/bin/env bash
+
+function audio::announce() {
+    local announcement="${1}"
+
+    espeak "${announcement}"
+}
