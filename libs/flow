@@ -253,7 +253,7 @@ function flow::goodbye() {
 
 function flow::main() {
     echo
-    echo "Welcome to Shell Tea Timer"
+    echo "Welcome to Shell Tea Timer ({{{version}}}, {{{generated_on}}})"
 
     flow::init
 

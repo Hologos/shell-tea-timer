@@ -2,10 +2,21 @@
 
 set -euo pipefail
 
+readonly BUILD_DIR="/tmp/shell-tea-timer.build"
 readonly TARGET_DIR="${HOME}/Downloads/"
 readonly UNDEF_VALUE="undefined"
 
 readonly tag="$(git describe --tags)"
+readonly gendatetime="$(date +'%d.%m.%Y %H:%M:%S')"
+
+function replace_placeholders() {
+    local relative_filepath="${1}"
+
+    cat "${relative_filepath}" \
+        | sed "s/{{{version}}}/${tag}/" \
+        | sed "s/{{{generated_on}}}/${gendatetime}/" \
+        > "${BUILD_DIR}/${relative_filepath}"
+}
 
 if [[ "${tag}" == "${UNDEF_VALUE}" ]]; then
     >&2 echo
@@ -13,4 +24,20 @@ if [[ "${tag}" == "${UNDEF_VALUE}" ]]; then
     exit 1
 fi
 
-tar -czvf "${TARGET_DIR}/shell-tea-timer.${tag}.tar.gz" shell-tea-timer conf libs vendor README.md LICENSE
+if [[ -d "${BUILD_DIR}" ]]; then
+    echo -n "About to remove build dir [${BUILD_DIR}]. Continue [enter/ctrl+c]? "
+    read -r answer
+    command rm -rf "${BUILD_DIR}"
+fi
+
+files=( "shell-tea-timer" "conf" "libs" "vendor" "README.md" "LICENSE" )
+
+mkdir "${BUILD_DIR}"
+cp -r "${files[@]}" "${BUILD_DIR}/"
+
+replace_placeholders "shell-tea-timer"
+replace_placeholders "libs/flow"
+
+cd "${BUILD_DIR}"
+
+tar -czvf "${TARGET_DIR}/shell-tea-timer.${tag}.tar.gz" "${files[@]}"

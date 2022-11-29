@@ -1,5 +1,8 @@
 #! /usr/bin/env bash
 
+# generated on {{{generated_on}}}
+# version: {{{version}}}
+
 set -euo pipefail
 
 # -- global variables ---------------------------------------------------------
