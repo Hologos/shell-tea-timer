@@ -76,3 +76,13 @@ function utils::check_prerequisites() {
     # OS specific prerequisites
     utils::"${STT_OS}"::check_prerequisites
 }
+
+function utils::verify_number() {
+    local input="${1}"
+
+    if ! [[ "${input}" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+        utils::terminate "[${input}] is not a valid number (nor integer, nor float)."
+    fi
+
+    return 0
+}

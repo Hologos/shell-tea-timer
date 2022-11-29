@@ -20,6 +20,12 @@ function setup::setup_tea_params() {
     utils::check_if_set "number of total infusions" "${TEA_NUMBER_OF_INFUSIONS}"
     utils::check_if_set "brewing temperature" "${TEA_BREWING_TEMP}"
     utils::check_if_set "amount per 100g" "${TEA_AMOUNT_PER_100G}"
+
+    utils::verify_number "${TEA_INITIAL_INFUSION_DURATION}"
+    utils::verify_number "${TEA_NEXT_INFUSION_DURATION}"
+    utils::verify_number "${TEA_NUMBER_OF_INFUSIONS}"
+    utils::verify_number "${TEA_BREWING_TEMP}"
+    utils::verify_number "${TEA_AMOUNT_PER_100G}"
 }
 
 function setup::setup_pot_params() {
@@ -39,6 +45,9 @@ function setup::setup_pot_params() {
     utils::check_if_set "pot name" "${POT_NAME}"
     utils::check_if_set "pot decant duration" "${POT_DECANT_DURATION}"
     utils::check_if_set "pot capacity with leaves" "${POT_CAPACITY_WITH_LEAVES}"
+
+    utils::verify_number "${POT_DECANT_DURATION}"
+    utils::verify_number "${POT_CAPACITY_WITH_LEAVES}"
 }
 
 function setup::setup_announcement_params() {
