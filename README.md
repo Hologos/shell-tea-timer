@@ -65,7 +65,7 @@ Environment variables
     STT_TEA_SESSION_LOG_FILEPATH - filepath to finished tea session log file
 ```
 
-You either have to specify the dirpath to configuration files via an argument `-c` or you can set an environment variable `STT_CONFIG_DITPATH`.
+You either have to specify a dirpath to configuration files via an argument `-c` or you can set an environment variable `STT_CONFIG_DITPATH`.
 
 ### Supported actions
 
