@@ -11,7 +11,7 @@ function flow::ask_main_action() {
 
     echo
     ansi --bold --no-newline "${main_action_message} "
-    action="$(echo -e "$(IFS=$'\n'; printf '%s' "${main_action_list[*]}")" | fzf)" || utils::terminate "You have to choose an action!"
+    action="$(echo -e "$(IFS=$'\n'; printf '%s' "${main_action_list[*]}")" | fzf --no-mouse)" || utils::terminate "You have to choose an action!"
     ansi --bold --no-newline "${main_action_message} "
     ansi "${action}"
 
@@ -61,7 +61,7 @@ function flow::ask_existing_session() {
 
     echo
     ansi --bold --no-newline "${action_message} "
-    chosen_tea_session="$(echo -e "$(IFS=$'\n'; printf '%s' "${discovered_tea_sessions[*]}")" | fzf)" || utils::terminate "You have to choose existing tea session!"
+    chosen_tea_session="$(echo -e "$(IFS=$'\n'; printf '%s' "${discovered_tea_sessions[*]}")" | fzf --no-mouse)" || utils::terminate "You have to choose existing tea session!"
     ansi --bold --no-newline "${action_message} "
     ansi "${chosen_tea_session}"
 
@@ -107,7 +107,7 @@ function flow::end_current_session() {
 
     echo
     ansi --bold --no-newline "${action_message} "
-    action="$(echo -e "$(IFS=$'\n'; printf '%s' "${action_list[*]}")" | fzf)" || utils::terminate "You have to choose an action!"
+    action="$(echo -e "$(IFS=$'\n'; printf '%s' "${action_list[*]}")" | fzf --no-mouse)" || utils::terminate "You have to choose an action!"
     ansi --bold --no-newline "${action_message} "
     ansi "${action}"
 
@@ -191,7 +191,7 @@ function flow::start_session() {
         while true; do
             echo
             ansi --bold --no-newline "${action_message} "
-            action="$(echo -e "$(IFS=$'\n'; printf '%s' "${action_list[*]}")" | fzf)" || utils::terminate "You have to choose an action!"
+            action="$(echo -e "$(IFS=$'\n'; printf '%s' "${action_list[*]}")" | fzf --no-mouse)" || utils::terminate "You have to choose an action!"
             ansi --bold --no-newline "${action_message} "
             ansi "${action}"
 

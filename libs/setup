@@ -76,13 +76,13 @@ function setup::setup_params_if_valid_tea() {
 }
 
 function setup::setup_pot() {
-    POT="$(io::discover_pot_conf_files | rev | cut -c 6- | rev | sort | fzf)" || utils::terminate "You have to choose a pot!"
+    POT="$(io::discover_pot_conf_files | rev | cut -c 6- | rev | sort | fzf --no-mouse)" || utils::terminate "You have to choose a pot!"
     io::write_param "${TEA}" "${IO_PARAM_POT}" "${POT}"
     setup::setup_pot_params "${TEA}"
 }
 
 function setup::setup_tea() {
-    TEA="$(io::discover_tea_conf_files | rev | cut -c 6- | rev | sort | fzf)" || utils::terminate "You have to choose a tea!"
+    TEA="$(io::discover_tea_conf_files | rev | cut -c 6- | rev | sort | fzf --no-mouse)" || utils::terminate "You have to choose a tea!"
     setup::setup_tea_params "${TEA}"
 }
 
