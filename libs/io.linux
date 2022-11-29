@@ -1,0 +1,9 @@
+#! /usr/bin/env bash
+
+function io::get_last_modif_time_in_epoch() {
+    local filepath="${1}"
+
+    io::is_existing_readable_file "${filepath}"
+
+    stat --format="%Y" "${filepath}"
+}

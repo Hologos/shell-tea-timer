@@ -1,0 +1,7 @@
+#! /usr/bin/env bash
+
+function formatting::human_readable_datetime() {
+    local epoch="${1}"
+
+    gdate -d "@${epoch}" +'%d.%m.%Y %H:%M'
+}

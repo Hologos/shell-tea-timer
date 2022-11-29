@@ -96,19 +96,31 @@ ANNOUNCEMENT_TOO_MANY_INFUSIONS="${UNDEF_VALUE}"
 
 case "${STT_OS}" in
     "${STT_OS_LINUX}")
+        # shellcheck source=libs/io.linux
+        . "${LIBS_DIRPATH}/io.linux"
+
         # shellcheck source=libs/utils.linux
         . "${ABSOLUTE_DIRPATH}/libs/utils.linux"
 
         # shellcheck source=libs/audio.linux
         . "${ABSOLUTE_DIRPATH}/libs/audio.linux"
+
+        # shellcheck source=libs/formatting.linux
+        . "${ABSOLUTE_DIRPATH}/libs/formatting.linux"
     ;;
 
     "${STT_OS_MACOS}")
+        # shellcheck source=libs/io.macos
+        . "${LIBS_DIRPATH}/io.macos"
+
         # shellcheck source=libs/utils.macos
         . "${ABSOLUTE_DIRPATH}/libs/utils.macos"
 
         # shellcheck source=libs/audio.macos
         . "${ABSOLUTE_DIRPATH}/libs/audio.macos"
+
+        # shellcheck source=libs/formatting.macos
+        . "${ABSOLUTE_DIRPATH}/libs/formatting.macos"
     ;;
 esac
 
