@@ -5,7 +5,8 @@ STT_TEA_SESSION_HIST_ENABLED=0
 function flow::ask_main_action() {
     local action_new_session="Start new session"
     local action_load_session="Load existing session"
-    local main_action_list=( "${action_new_session}" "${action_load_session}" )
+    local action_exit="Exit program"
+    local main_action_list=( "${action_new_session}" "${action_load_session}" "${action_exit}" )
     local main_action_message="What would you like to do?"
     local action
 
@@ -22,6 +23,10 @@ function flow::ask_main_action() {
 
         "${action_load_session}" )
             flow::load_session_action
+        ;;
+
+        "${action_exit}" )
+            :
         ;;
 
         * )
