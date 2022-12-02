@@ -192,6 +192,9 @@ function flow::ask_modify_params() {
         "${_TMP_TEA_AMOUNT_PER_100G}" \
         "${_TMP_POT_DECANT_DURATION}" \
         "${_TMP_POT_CAPACITY_WITH_LEAVES}"
+
+    echo
+    echo "Brewing parameters successfully modified."
 }
 
 function flow::end_current_session() {
