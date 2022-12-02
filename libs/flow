@@ -123,6 +123,13 @@ function flow::ask_modify_param() {
     eval "${variable_name}=${answer}"
 }
 
+function flow::ask_modify_initial_infusion_duration() {
+    flow::ask_modify_param \
+        "Initial infusion duration (current value: ${TEA_INITIAL_INFUSION_DURATION}) or press [enter] to skip:" \
+        "${TEA_INITIAL_INFUSION_DURATION}" \
+        "_TMP_TEA_INITIAL_INFUSION_DURATION"
+}
+
 function flow::ask_modify_next_infusion_duration() {
     flow::ask_modify_param \
         "Next infusion duration (current value: ${TEA_NEXT_INFUSION_DURATION}) or press [enter] to skip:" \
@@ -137,13 +144,51 @@ function flow::ask_modify_number_of_infusions() {
         "_TMP_TEA_NUMBER_OF_INFUSIONS"
 }
 
+function flow::ask_modify_brewing_temp() {
+    flow::ask_modify_param \
+        "Brewing temperature (current value: ${TEA_BREWING_TEMP}) or press [enter] to skip:" \
+        "${TEA_BREWING_TEMP}" \
+        "_TMP_TEA_BREWING_TEMP"
+}
+
+function flow::ask_modify_amount_per_100g() {
+    flow::ask_modify_param \
+        "Amount of leaves per 100g (current value: ${TEA_AMOUNT_PER_100G}) or press [enter] to skip:" \
+        "${TEA_AMOUNT_PER_100G}" \
+        "_TMP_TEA_AMOUNT_PER_100G"
+}
+
+function flow::ask_modify_pot_decant_duration() {
+    flow::ask_modify_param \
+        "Pot decant duration (current value: ${POT_DECANT_DURATION}) or press [enter] to skip:" \
+        "${POT_DECANT_DURATION}" \
+        "_TMP_POT_DECANT_DURATION"
+}
+
+function flow::ask_modify_pot_capacity_with_leaves() {
+    flow::ask_modify_param \
+        "Pot capacity with leaves (current value: ${POT_CAPACITY_WITH_LEAVES}) or press [enter] to skip:" \
+        "${POT_CAPACITY_WITH_LEAVES}" \
+        "_TMP_POT_CAPACITY_WITH_LEAVES"
+}
+
 function flow::ask_modify_params() {
+    flow::ask_modify_initial_infusion_duration
     flow::ask_modify_next_infusion_duration
     flow::ask_modify_number_of_infusions
+    flow::ask_modify_brewing_temp
+    flow::ask_modify_amount_per_100g
+    flow::ask_modify_pot_decant_duration
+    flow::ask_modify_pot_capacity_with_leaves
 
     setup::modify_params \
+        "${_TMP_TEA_INITIAL_INFUSION_DURATION}" \
         "${_TMP_TEA_NEXT_INFUSION_DURATION}" \
-        "${_TMP_TEA_NUMBER_OF_INFUSIONS}"
+        "${_TMP_TEA_NUMBER_OF_INFUSIONS}" \
+        "${_TMP_TEA_BREWING_TEMP}" \
+        "${_TMP_TEA_AMOUNT_PER_100G}" \
+        "${_TMP_POT_DECANT_DURATION}" \
+        "${_TMP_POT_CAPACITY_WITH_LEAVES}"
 }
 
 function flow::end_current_session() {

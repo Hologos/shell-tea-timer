@@ -87,12 +87,29 @@ function setup::setup_tea() {
 }
 
 function setup::modify_params() {
-    local next_infusion_duration="${1}"
-    local number_of_infusions="${2}"
+    local initial_infusion_duration="${1}"
+    local next_infusion_duration="${2}"
+    local number_of_infusions="${3}"
+    local tea_brewing_temp="${4}"
+    local tea_amount_per_100g="${5}"
+    local pot_decant_duration="${6}"
+    local pot_capacity_with_leaves="${7}"
 
+    utils::verify_number "initial infusion duration" "${initial_infusion_duration}"
     utils::verify_number "next infusion duration" "${next_infusion_duration}"
     utils::verify_number "number of total infusions" "${number_of_infusions}"
+    utils::verify_number "brewing temperature" "${tea_brewing_temp}"
+    utils::verify_number "amount per 100g" "${tea_amount_per_100g}"
 
+    TEA_INITIAL_INFUSION_DURATION="${initial_infusion_duration}"
     TEA_NEXT_INFUSION_DURATION="${next_infusion_duration}"
     TEA_NUMBER_OF_INFUSIONS="${number_of_infusions}"
+    TEA_BREWING_TEMP="${tea_brewing_temp}"
+    TEA_AMOUNT_PER_100G="${tea_amount_per_100g}"
+
+    utils::verify_number "pot decant duration" "${pot_decant_duration}"
+    utils::verify_number "pot capacity with leaves" "${pot_capacity_with_leaves}"
+
+    POT_DECANT_DURATION="${pot_decant_duration}"
+    POT_CAPACITY_WITH_LEAVES="${pot_capacity_with_leaves}"
 }
