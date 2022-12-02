@@ -123,8 +123,8 @@ function io::discover_tea_sessions() {
         while IFS=$'\n' read -r dat_file; do
             echo "${dat_file}" |
                 while IFS="." read -r filename_root tea param_name filename_extension; do
-                    pot="$(io::read_param "${tea}" "${IO_PARAM_POT}")"
-                    tea_infusion_counter="$(io::read_param "${tea}" "${IO_PARAM_TEA_INFUSION_COUNTER}")"
+                    pot="$(io::read_param_grace "${tea}" "${IO_PARAM_POT}")" || continue
+                    tea_infusion_counter="$(io::read_param_grace "${tea}" "${IO_PARAM_TEA_INFUSION_COUNTER}")" || continue
 
                     line=""
                     line+="${tea}"
