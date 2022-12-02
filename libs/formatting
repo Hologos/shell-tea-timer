@@ -11,7 +11,7 @@ function formatting::format_seconds() {
     printf '%s %s' "${seconds}" "${placeholder}"
 }
 
-function formattting::format_infusion_number_ordinal() {
+function formatting::format_infusion_number_ordinal() {
     local tea_infusion_counter="${1}"
 
     printf '%s' "${tea_infusion_counter}"
@@ -24,7 +24,7 @@ function formattting::format_infusion_number_ordinal() {
     esac
 }
 
-function formattting::format_infusion_number() {
+function formatting::format_infusion_number() {
     local tea_infusion_counter="${1}"
 
     printf '%s infusion' "${tea_infusion_counter}"

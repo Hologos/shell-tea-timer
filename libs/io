@@ -130,7 +130,7 @@ function io::discover_tea_sessions() {
                     line+="${delimiter}"
                     line+="${pot}"
                     line+="${delimiter}"
-                    line+="$(formattting::format_infusion_number "${tea_infusion_counter}")"
+                    line+="$(formatting::format_infusion_number "${tea_infusion_counter}")"
                     line+="${delimiter}"
                     line+="$(formatting::human_readable_datetime "$(io::get_last_modif_time_in_epoch "${dat_file}")")"
 
