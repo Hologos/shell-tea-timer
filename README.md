@@ -46,7 +46,6 @@ Thank you for using Shell Tea Timer (by hologos).
 * [Description](#description)
     * [Usage](#usage)
     * [Supported actions](#supported-actions)
-    * [Tea session log](#tea-session-log)
     * [Configuration files](#configuration-files)
 * [Installation](#installation)
     * [Dependencies](#dependencies)
@@ -68,7 +67,6 @@ shell-tea-timer [-h] [-c <configs-dirpath>]
 
 Environment variables
     STT_CONFIG_DITPATH - dirpath to configs directory
-    STT_TEA_SESSION_LOG_FILEPATH - filepath to finished tea session log file
 ```
 
 You either have to specify a dirpath to configuration files via an argument `-c` or you can set an environment variable `STT_CONFIG_DITPATH`.
@@ -80,15 +78,6 @@ Upon running the script, you can start new tea session or load an existing (unfi
 Upon finishing single infusion, you can continue with another infusion, end the tea session or modify brewing parameters.
 
 When you finish a tea session, you can either remove the tea session and save it for later.
-
-### Tea session log
-
-Defining file via `STT_TEA_SESSION_LOG_FILEPATH` enables you to save finished tea session into a CSV file.
-
-```csv
-Date & time;Tea name;Pot name;Amount of leaves;Water temperature;Number of infusions;Initial infusion duration;Next infusion duration
-28.11.2022 14:57;Generic Green Tea;Yixing Pot 180 ml;5.6 g;80°C;3;15 seconds;3 seconds
-```
 
 ### Configuration files
 
