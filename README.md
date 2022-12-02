@@ -46,7 +46,7 @@ Thank you for using Shell Tea Timer (by hologos).
 * [Description](#description)
     * [Usage](#usage)
     * [Supported actions](#supported-actions)
-    * [Tea session log](#tea-session-log)
+    * [Finished tea infusion logging](#finished-tea-infusion-logging)
     * [Configuration files](#configuration-files)
 * [Installation](#installation)
     * [Dependencies](#dependencies)
@@ -68,7 +68,7 @@ shell-tea-timer [-h] [-c <configs-dirpath>]
 
 Environment variables
     STT_CONFIG_DITPATH - dirpath to configs directory
-    STT_TEA_SESSION_LOG_FILEPATH - filepath to finished tea session log file
+    STT_TEA_INFUSIONS_LOG_FILEPATH - filepath to finished tea infusions log file
 ```
 
 You either have to specify a dirpath to configuration files via an argument `-c` or you can set an environment variable `STT_CONFIG_DITPATH`.
@@ -81,13 +81,15 @@ Upon finishing single infusion, you can continue with another infusion, end the 
 
 When you finish a tea session, you can either remove the tea session and save it for later.
 
-### Tea session log
+### Finished tea infusion logging
 
-Defining file via `STT_TEA_SESSION_LOG_FILEPATH` enables you to save finished tea session into a CSV file.
+Defining file via `STT_TEA_INFUSIONS_LOG_FILEPATH` enables you to save finished tea infusions into a CSV file.
 
 ```csv
-Date & time;Tea name;Pot name;Amount of leaves;Water temperature;Number of infusions;Initial infusion duration;Next infusion duration
-28.11.2022 14:57;Generic Green Tea;Yixing Pot 180 ml;5.6 g;80°C;3;15 seconds;3 seconds
+Tea session start date & time;Tea name;Pot name;Amount of leaves;Water temperature;Infusion finish date & time;Infusion number;Infusion duration
+02.12.2022-18:33;Generic Raw Puerh Tea (sheng, green);Generic 200 ml;9.0 g;95°C;02.12.2022-18:34;1st out of recommended 15;10 seconds
+02.12.2022-18:33;Generic Raw Puerh Tea (sheng, green);Generic 200 ml;9.0 g;95°C;02.12.2022-18:34;2nd out of recommended 15;13 seconds
+02.12.2022-18:34;Generic Green Tea;Generic 200 ml;6.3 g;80°C;02.12.2022-18:34;1st out of recommended 5;15 seconds
 ```
 
 ### Configuration files
