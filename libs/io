@@ -111,7 +111,7 @@ function io::reset_infusion_counter() {
 
 function io::discover_tea_sessions() {
     local dirpath filename_root line
-    local delimiter=":"
+    local delimiter=" "
 
     dirpath="$(dirname "${_IO_TMP_FILEPATH_ROOT}")"
     filename_root="$(basename "${_IO_TMP_FILEPATH_ROOT}")"
@@ -125,15 +125,16 @@ function io::discover_tea_sessions() {
                 while IFS="." read -r filename_root tea param_name filename_extension; do
                     pot="$(io::read_param_grace "${tea}" "${IO_PARAM_POT}")" || continue
                     tea_infusion_counter="$(io::read_param_grace "${tea}" "${IO_PARAM_TEA_INFUSION_COUNTER}")" || continue
+                    tea_session_start_datetime="$(io::read_param_grace "${tea}" "${IO_PARAM_TEA_SESSION_START_DATETIME}")" || continue
 
                     line=""
-                    line+="${tea}"
+                    line+="started=${tea_session_start_datetime}"
                     line+="${delimiter}"
-                    line+="${pot}"
+                    line+="tea=${tea}"
                     line+="${delimiter}"
-                    line+="$(formatting::format_infusion_number "${tea_infusion_counter}")"
+                    line+="pot=${pot}"
                     line+="${delimiter}"
-                    line+="$(formatting::human_readable_datetime "$(io::get_last_modif_time_in_epoch "${dat_file}")")"
+                    line+="infusions=${tea_infusion_counter}"
 
                     echo "${line}"
                 done

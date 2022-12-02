@@ -63,7 +63,7 @@ function flow::ask_existing_session() {
 
     while IFS=$'\n' read -r tea_session; do
         discovered_tea_sessions+=( "${tea_session}" )
-    done < <(io::discover_tea_sessions)
+    done < <(io::discover_tea_sessions | sort -n)
 
     echo
     ansi --bold --no-newline "${action_message} "
@@ -73,7 +73,7 @@ function flow::ask_existing_session() {
 
     echo
     ansi --bold "Loading existing session."
-    tea="$(echo "${chosen_tea_session}" | cut -d ':' -f 1)"
+    tea="$(echo "${chosen_tea_session}" | cut -d ' ' -f 2 | cut -d '=' -f 2)"
     setup::setup_params_if_valid_tea "${tea}"
 }
 
