@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 
 STT_TEA_SESSION_HIST_ENABLED=0
+STT_NEW_BREWING_PARAMS=0
 
 function flow::ask_main_action() {
     local action_new_session="Start new session"
@@ -173,6 +174,8 @@ function flow::ask_modify_pot_capacity_with_leaves() {
 }
 
 function flow::ask_modify_params() {
+    STT_NEW_BREWING_PARAMS=1
+
     flow::ask_modify_initial_infusion_duration
     flow::ask_modify_next_infusion_duration
     flow::ask_modify_number_of_infusions
@@ -234,17 +237,11 @@ function flow::new_session_action() {
 
     flow::ask_pot
 
-    gfx::show_recommended_water_temp
-
-    gfx::show_recommended_leaf_amount
-
     flow::start_session 0
 }
 
 function flow::load_session_action() {
     flow::ask_existing_session
-
-    gfx::show_recommended_water_temp
 
     flow::start_session "${TEA_INFUSION_COUNTER}"
 }
@@ -260,15 +257,25 @@ function flow::start_session() {
     local action
     local ready_to_start
 
-    flow::ask_want_modify_params
+    STT_NEW_BREWING_PARAMS=1
 
-    echo
-    ansi --bold --no-newline "Press [enter] when you are ready to start."
-    read -r ready_to_start
+    flow::ask_want_modify_params
 
     TEA_INFUSION_COUNTER="${tea_infusion_counter}"
 
     while true; do
+        if [[ "${STT_NEW_BREWING_PARAMS}" -eq 1 ]]; then
+            STT_NEW_BREWING_PARAMS=0
+
+            gfx::show_recommended_water_temp
+
+            gfx::show_recommended_leaf_amount
+
+            echo
+            ansi --bold --no-newline "Press [enter] when you are ready to start."
+            read -r ready_to_start
+        fi
+
         TEA_INFUSION_COUNTER="$(( TEA_INFUSION_COUNTER + 1 ))"
         io::write_param "${TEA}" "${IO_PARAM_TEA_INFUSION_COUNTER}" "${TEA_INFUSION_COUNTER}"
 
