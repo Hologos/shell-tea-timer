@@ -77,9 +77,9 @@ function flow::ask_existing_session() {
 }
 
 function flow::ask_want_modify_params() {
-    local action_dont_want_session="No"
-    local action_want_session="Yes"
-    local action_list=( "${action_dont_want_session}" "${action_want_session}" )
+    local action_dont_want_modify="No"
+    local action_want_modify="Yes"
+    local action_list=( "${action_dont_want_modify}" "${action_want_modify}" )
     local action_message="Do you want to modify brewing parameters?"
     local action
 
@@ -90,11 +90,11 @@ function flow::ask_want_modify_params() {
     ansi "${action}"
 
     case "${action}" in
-        "${action_dont_want_session}" )
+        "${action_dont_want_modify}" )
             :
         ;;
 
-        "${action_want_session}" )
+        "${action_want_modify}" )
             flow::ask_modify_params
         ;;
 
