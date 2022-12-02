@@ -1,5 +1,6 @@
 #! /usr/bin/env bash
 
+STT_TEA_INFUSIONS_HIST_ENABLED=0
 STT_NEW_BREWING_PARAMS=0
 
 function flow::ask_main_action() {
@@ -292,6 +293,16 @@ function flow::start_session() {
         echo "Decant your tea now!"
         audio::announce "${ANNOUNCEMENT_DECANT_NOW}" &
 
+        flow::log_finished_tea_infusion \
+            "${TEA_SESSION_START_DATETIME}" \
+            "${TEA_NAME}" \
+            "${POT_NAME}" \
+            "$(formatting::format_infusion_number_ordinal "${TEA_INFUSION_COUNTER}")" \
+            "${TEA_NUMBER_OF_INFUSIONS}" \
+            "$(formatting::format_seconds "${infuse_duration}")" \
+            "$(helpers::calculate_leaves_amount)" \
+            "$(helpers::water_temp)"
+
         while true; do
             echo
             ansi --bold --no-newline "${action_message} "
@@ -322,8 +333,42 @@ function flow::start_session() {
     done
 }
 
+function flow::check_finished_tea_infusions_logging() {
+    if [[ -z "${STT_TEA_INFUSIONS_LOG_FILEPATH+_}" ]]; then
+        echo
+        ansi --bold --red "Environment variable \$STT_TEA_INFUSIONS_LOG_FILEPATH is not set, logging finished tea infusions is disabled!"
+        return
+    fi
+
+    STT_TEA_INFUSIONS_HIST_ENABLED=1
+}
+
 function flow::init() {
     setup::setup_announcement_params
+}
+
+function flow::log_finished_tea_infusion() {
+    local tea_session_start_datetime="${1}"
+    local tea_name="${2}"
+    local pot_name="${3}"
+    local infusion_number_ordinal="${4}"
+    local recommended_number_of_infusions="${5}"
+    local infuse_duration="${6}"
+    local leaves_amount="${7}"
+    local water_temperature="${8}"
+
+    echo
+    ansi --bold "Logging finished tea infusion."
+    io::log_finished_tea_infusion \
+        "${tea_session_start_datetime}" \
+        "$(utils::get_current_datetime)" \
+        "${tea_name}" \
+        "${pot_name}" \
+        "${infusion_number_ordinal}" \
+        "${recommended_number_of_infusions}" \
+        "${infuse_duration}" \
+        "${leaves_amount}" \
+        "${water_temperature}"
 }
 
 function flow::goodbye() {
@@ -338,6 +383,8 @@ function flow::main() {
     echo "Welcome to Shell Tea Timer ({{{version}}}, {{{generated_on}}})"
 
     flow::init
+
+    flow::check_finished_tea_infusions_logging
 
     flow::ask_main_action
 

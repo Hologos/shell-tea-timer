@@ -46,6 +46,7 @@ Thank you for using Shell Tea Timer (by hologos).
 * [Description](#description)
     * [Usage](#usage)
     * [Supported actions](#supported-actions)
+    * [Finished tea infusion logging](#finished-tea-infusion-logging)
     * [Configuration files](#configuration-files)
 * [Installation](#installation)
     * [Dependencies](#dependencies)
@@ -67,6 +68,7 @@ shell-tea-timer [-h] [-c <configs-dirpath>]
 
 Environment variables
     STT_CONFIG_DITPATH - dirpath to configs directory
+    STT_TEA_INFUSIONS_LOG_FILEPATH - filepath to finished tea infusions log file
 ```
 
 You either have to specify a dirpath to configuration files via an argument `-c` or you can set an environment variable `STT_CONFIG_DITPATH`.
@@ -78,6 +80,17 @@ Upon running the script, you can start new tea session or load an existing (unfi
 Upon finishing single infusion, you can continue with another infusion, end the tea session or modify brewing parameters.
 
 When you finish a tea session, you can either remove the tea session and save it for later.
+
+### Finished tea infusion logging
+
+Defining file via `STT_TEA_INFUSIONS_LOG_FILEPATH` enables you to save finished tea infusions into a CSV file.
+
+```csv
+Tea session start date & time;Tea name;Pot name;Amount of leaves;Water temperature;Infusion finish date & time;Infusion number;Infusion duration
+02.12.2022-18:33;Generic Raw Puerh Tea (sheng, green);Generic 200 ml;9.0 g;95°C;02.12.2022-18:34;1st out of recommended 15;10 seconds
+02.12.2022-18:33;Generic Raw Puerh Tea (sheng, green);Generic 200 ml;9.0 g;95°C;02.12.2022-18:34;2nd out of recommended 15;13 seconds
+02.12.2022-18:34;Generic Green Tea;Generic 200 ml;6.3 g;80°C;02.12.2022-18:34;1st out of recommended 5;15 seconds
+```
 
 ### Configuration files
 

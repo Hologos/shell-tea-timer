@@ -151,6 +151,67 @@ function io::remove_tea_session_data() {
         | xargs rm -f
 }
 
+function io::log_finished_tea_infusion () {
+    local tea_session_start_datetime="${1}"
+    local tea_infusion_finish_datetime="${2}"
+    local tea_name="${3}"
+    local pot_name="${4}"
+    local infusion_number_ordinal="${5}"
+    local recommended_number_of_infusions="${6}"
+    local infuse_duration="${7}"
+    local leaves_amount="${8}"
+    local water_temperature="${9}"
+
+    local delimiter=";"
+    local message=""
+
+    if [[ "${STT_TEA_INFUSIONS_HIST_ENABLED}" -ne 1 ]]; then
+        ansi --bold --red "Environment variable \$STT_TEA_INFUSIONS_LOG_FILEPATH is not set, logging finished tea infusions is disabled!"
+        return
+    fi
+
+    if [[ ! -e "${STT_TEA_INFUSIONS_LOG_FILEPATH}" ]]; then
+        message+="Tea session start date & time"
+        message+="${delimiter}"
+        message+="Tea name"
+        message+="${delimiter}"
+        message+="Pot name"
+        message+="${delimiter}"
+        message+="Amount of leaves"
+        message+="${delimiter}"
+        message+="Water temperature"
+        message+="${delimiter}"
+        message+="Infusion finish date & time"
+        message+="${delimiter}"
+        message+="Infusion number"
+        message+="${delimiter}"
+        message+="Infusion duration"
+
+        echo "${message}" > "${STT_TEA_INFUSIONS_LOG_FILEPATH}" \
+            || utils::terminate "Cannot log finished tea infusion into [${STT_TEA_INFUSIONS_LOG_FILEPATH}]."
+    fi
+
+    message=""
+    message+="${tea_session_start_datetime}"
+    message+="${delimiter}"
+    message+="${tea_name}"
+    message+="${delimiter}"
+    message+="${pot_name}"
+    message+="${delimiter}"
+    message+="${leaves_amount}"
+    message+="${delimiter}"
+    message+="${water_temperature}"
+    message+="${delimiter}"
+    message+="${tea_infusion_finish_datetime}"
+    message+="${delimiter}"
+    message+="${infusion_number_ordinal} out of recommended ${recommended_number_of_infusions}"
+    message+="${delimiter}"
+    message+="${infuse_duration}"
+
+    echo "${message}" >> "${STT_TEA_INFUSIONS_LOG_FILEPATH}" \
+        || utils::terminate "Cannot log finished tea session into [${STT_TEA_INFUSIONS_LOG_FILEPATH}]."
+}
+
 function io::is_existing_readable_file() {
     local filepath="${filepath}"
 
