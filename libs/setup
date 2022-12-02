@@ -5,7 +5,7 @@ function setup::setup_tea_params() {
     local tea_config_filepath
 
     TEA="${tea}"
-    tea_config_filepath="$(io::discover_tea_conf_files | grep "${tea}")" || return 1
+    tea_config_filepath="$(io::discover_tea_conf_files | grep "${tea}")" || utils::terminate "Cannot find configuration file for tea [${tea}]."
 
     local filepath="${TEAS_CONF_DIRPATH}/${tea_config_filepath}"
 
@@ -33,7 +33,7 @@ function setup::setup_pot_params() {
     local pot_config_filepath
 
     POT="$(io::read_param "${tea}" "${IO_PARAM_POT}")" || exit ${?}
-    pot_config_filepath="$(io::discover_pot_conf_files | grep "${POT}")" || return 1
+    pot_config_filepath="$(io::discover_pot_conf_files | grep "${POT}")" || utils::terminate "Cannot find configuration file for pot [${POT}]."
 
     local filepath="${POTS_CONF_DIRPATH}/${pot_config_filepath}"
 
@@ -67,8 +67,8 @@ function setup::setup_announcement_params() {
 function setup::setup_params_if_valid_tea() {
     local tea="${1}"
 
-    setup::setup_tea_params "${tea}" || return 1
-    setup::setup_pot_params "${tea}" || return 1
+    setup::setup_tea_params "${tea}" || utils::terminate "Cannot setup tea."
+    setup::setup_pot_params "${tea}" || utils::terminate "Cannot setup pot."
 
     TEA_INFUSION_COUNTER="$(io::read_param_grace "${TEA}" "${IO_PARAM_TEA_INFUSION_COUNTER}" || printf '0')"
 
