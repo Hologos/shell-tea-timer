@@ -218,11 +218,7 @@ function flow::start_session() {
             esac
         done
 
-        echo
-        echo
-        echo
-        echo
-        echo
+        gfx::clear_screen
     done
 }
 
@@ -252,6 +248,8 @@ function flow::goodbye() {
 }
 
 function flow::main() {
+    gfx::clear_screen
+
     echo
     echo "Welcome to Shell Tea Timer ({{{version}}}, {{{generated_on}}})"
 
