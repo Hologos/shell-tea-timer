@@ -5,13 +5,15 @@ Tracks tea infusions & guides you through Gong Fu Cha tea session.
 ```
 $ shell-tea-timer
 
-Welcome to Shell Tea Timer
+Welcome to Shell Tea Timer (v1.0, 1.12.2022 20:00:00)
 
 What would you like to do? Start new session
 
 Choose a tea you want to brew: Day Drinking Diva (raw, sheng)
 
 Choose a pot you want to brew in: White Broken Zhong 100 ml
+
+Do you want to modify brewing parameters? No
 
 Heat your water to 95°C.
 
@@ -29,6 +31,10 @@ Decanting should start 0 seconds earlier.
 Decant your tea now!
 
 How would you like to continue? End session
+
+What should happen to this tea session? Log & remove tea session
+
+Removing this tea session.
 
 Saving tea session.
 
