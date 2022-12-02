@@ -108,7 +108,7 @@ function flow::ask_modify_params() {
     local answer_number_of_infusions
     local action_message
 
-    action_message="Next infusion duration:"
+    action_message="Next infusion duration (current value: ${TEA_NEXT_INFUSION_DURATION}) or press [enter] to skip:"
 
     echo
     ansi --bold --no-newline "${action_message} "
@@ -117,13 +117,22 @@ function flow::ask_modify_params() {
     ansi --bold --no-newline "${action_message} "
     ansi "${answer_next_infusion_duration}"
 
-    action_message="Number of total infusions:"
+    action_message="Number of total infusions (current value: ${TEA_NUMBER_OF_INFUSIONS}) or press [enter] to skip:"
 
     ansi --bold --no-newline "${action_message} "
     read -r answer_number_of_infusions
     ansi --no-newline --up --delete-line
     ansi --bold --no-newline "${action_message} "
     ansi "${answer_number_of_infusions}"
+
+    # sets default values
+    if [[ "${answer_next_infusion_duration}" == "" ]]; then
+        answer_next_infusion_duration="${TEA_NEXT_INFUSION_DURATION}"
+    fi
+
+    if [[ "${answer_number_of_infusions}" == "" ]]; then
+        answer_number_of_infusions="${TEA_NUMBER_OF_INFUSIONS}"
+    fi
 
     setup::modify_params \
         "${answer_next_infusion_duration}" \
