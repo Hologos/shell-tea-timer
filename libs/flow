@@ -240,6 +240,8 @@ function flow::new_session_action() {
 
     flow::ask_pot
 
+    setup::setup_others
+
     flow::start_session 0
 }
 

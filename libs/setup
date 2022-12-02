@@ -50,6 +50,12 @@ function setup::setup_pot_params() {
     utils::verify_number "pot capacity with leaves" "${POT_CAPACITY_WITH_LEAVES}"
 }
 
+function setup::setup_other_params() {
+    local tea="${1}"
+
+    SESSION_START_DATETIME="$(io::read_param "${tea}" "${IO_PARAM_TEA_SESSION_START_DATETIME}")" || exit ${?}
+}
+
 function setup::setup_announcement_params() {
     local filepath="${ANNOUNCEMENTS_CONF_DIRPATH}/active.conf"
 
@@ -69,6 +75,7 @@ function setup::setup_params_if_valid_tea() {
 
     setup::setup_tea_params "${tea}" || utils::terminate "Cannot setup tea."
     setup::setup_pot_params "${tea}" || utils::terminate "Cannot setup pot."
+    setup::setup_other_params "${tea}" || utils::terminate "Cannot setup other parameters."
 
     TEA_INFUSION_COUNTER="$(io::read_param_grace "${TEA}" "${IO_PARAM_TEA_INFUSION_COUNTER}" || printf '0')"
 
@@ -84,6 +91,12 @@ function setup::setup_pot() {
 function setup::setup_tea() {
     TEA="$(io::discover_tea_conf_files | rev | cut -c 6- | rev | sort | fzf --no-mouse)" || utils::terminate "You have to choose a tea!"
     setup::setup_tea_params "${TEA}"
+}
+
+function setup::setup_others() {
+    SESSION_START_DATETIME="$(utils::get_current_datetime)"
+    io::write_param "${TEA}" "${IO_PARAM_TEA_SESSION_START_DATETIME}" "${SESSION_START_DATETIME}"
+    setup::setup_other_params "${TEA}"
 }
 
 function setup::modify_params() {

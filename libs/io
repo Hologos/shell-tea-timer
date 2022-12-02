@@ -7,6 +7,7 @@ readonly _IO_CONFIG_FILE_EXTENSION="conf"
 
 readonly IO_PARAM_POT="pot"
 readonly IO_PARAM_TEA_INFUSION_COUNTER="tea_infusion_counter"
+readonly IO_PARAM_TEA_SESSION_START_DATETIME="tea_session_start_datetime"
 
 function io::build_dat_filepath() {
     local tea_name="${1}"

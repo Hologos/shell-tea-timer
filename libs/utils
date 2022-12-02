@@ -87,3 +87,7 @@ function utils::verify_number() {
 
     return 0
 }
+
+function utils::get_current_datetime() {
+    date +'%d.%m%.%Y-%H:%M'
+}
