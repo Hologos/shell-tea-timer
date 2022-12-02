@@ -22,12 +22,12 @@ function gfx::countdown_start() {
 
     sleep_length="$(echo "scale=2;1/${cycles_per_second}" | bc)"
     decant_start="$(helpers::calculate_start_of_decanting_raw)"
-    datetime_start="$(stt:utils::get_current_datetime)"
+    datetime_start="$(stt:utils::get_current_datetime_with_nano)"
 
     echo
 
     while true; do
-        datetime_current="$(stt:utils::get_current_datetime)"
+        datetime_current="$(stt:utils::get_current_datetime_with_nano)"
         sec_milisec_diff="$(utils::get_elapsed_time "${datetime_start}" "${datetime_current}")"
         seconds_left="$(echo "scale=0;(${duration} - ${sec_milisec_diff} + 1)/1" | bc)" # +1 due to how rounding -0.xx works
         finished_percents="$(utils::get_finished_percentage "${sec_milisec_diff}" "${duration}")"
