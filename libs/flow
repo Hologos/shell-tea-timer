@@ -210,16 +210,12 @@ function flow::start_session() {
                 ;;
 
                 "${action_next_infusion}" )
-                    :
+                    break
                 ;;
 
                 * )
                     utils::terminate "Unknown action [${action}]."
             esac
-
-            if [[ "${action}" != "${action_modify_params}" ]]; then
-                break
-            fi
         done
 
         echo
