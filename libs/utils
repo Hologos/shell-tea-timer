@@ -36,7 +36,7 @@ function utils::check_if_set() {
     fi
 }
 
-function stt:utils::repeat_char() {
+function utils::repeat_char() {
     local end="${1}"
     local str="${2}"
 
