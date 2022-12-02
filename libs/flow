@@ -76,6 +76,33 @@ function flow::ask_existing_session() {
     setup::setup_params_if_valid_tea "${tea}"
 }
 
+function flow::ask_want_modify_params() {
+    local action_dont_want_session="No"
+    local action_want_session="Yes"
+    local action_list=( "${action_dont_want_session}" "${action_want_session}" )
+    local action_message="Do you want to modify brewing parameters?"
+    local action
+
+    echo
+    ansi --bold --no-newline "${action_message} "
+    action="$(echo -e "$(IFS=$'\n'; printf '%s' "${action_list[*]}")" | fzf --no-mouse)" || utils::terminate "You have to choose an action!"
+    ansi --bold --no-newline "${action_message} "
+    ansi "${action}"
+
+    case "${action}" in
+        "${action_dont_want_session}" )
+            :
+        ;;
+
+        "${action_want_session}" )
+            flow::ask_modify_params
+        ;;
+
+        * )
+            utils::terminate "Unknown action [${action}]."
+    esac
+}
+
 function flow::ask_modify_params() {
     local answer_next_infusion_duration
     local answer_number_of_infusions
@@ -171,6 +198,8 @@ function flow::start_session() {
     local action_message="How would you like to continue?"
     local action
     local ready_to_start
+
+    flow::ask_want_modify_params
 
     echo
     ansi --bold --no-newline "Press [enter] when you are ready to start."
