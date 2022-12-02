@@ -90,7 +90,9 @@ function setup::modify_params() {
     local next_infusion_duration="${1}"
     local number_of_infusions="${2}"
 
-    # TODO: validate values
+    utils::verify_number "next infusion duration" "${next_infusion_duration}"
+    utils::verify_number "number of total infusions" "${number_of_infusions}"
+
     TEA_NEXT_INFUSION_DURATION="${next_infusion_duration}"
     TEA_NUMBER_OF_INFUSIONS="${number_of_infusions}"
 }
